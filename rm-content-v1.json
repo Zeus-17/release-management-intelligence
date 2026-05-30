@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "content_version": "2026-05-29",
+    "schema_version": "1",
+    "tool_version": "v1",
+    "changelog": "Initial content layer. Framework guidance validated against: ITIL 4 current edition (AXELOS/PeopleCert), DORA dora.dev 2024 State of DevOps, SAFe 6.0, EU DORA Regulation 2022/2554 (in force Jan 2025), FCA PS21/3 Operational Resilience, UK GDPR/ICO guidance. Review quarterly or when AXELOS, DORA, FCA or EBA publish material updates.",
+    "next_review": "2026-08-29",
+    "maintainer": "Increment content_version to YYYY-MM-DD when updating. This file is fetched on page load to check for newer content than the baked-in version in the HTML."
+  },
+
+  "content_warnings": [
+    {
+      "id": "dora_eu_jan2025",
+      "type": "warn",
+      "title": "EU DORA in force from January 2025",
+      "text": "ICT change management obligations under DORA Article 9 apply to in-scope EU financial entities. Change management processes — including release management gates and approvals — must meet the requirements of Articles 9 and 10. Verify your firm's obligations with your compliance team.",
+      "applies_to": ["all"],
+      "expires": "2027-01-01"
+    },
+    {
+      "id": "itil4_edition_note",
+      "type": "info",
+      "title": "ITIL 4 (current edition) — verify against axelos.com",
+      "text": "Framework guidance reflects ITIL 4 current edition (AXELOS/PeopleCert). Practice definitions are held in this content layer — not compiled into the app — so guidance can update without requiring app changes. As ITIL evolves, updated definitions and version-aware notes will be added here. For organisations running hybrid ITIL environments, adopt at the pace that suits your organisation. Verify at axelos.com for the latest edition status.",
+      "applies_to": ["reference"],
+      "expires": "2028-01-01"
+    }
+  ],
+
+  "regulatory_references": {
+    "dora_article_9": {
+      "title": "DORA Article 9 — ICT security policies, procedures, protocols and tools",
+      "summary": "Financial entities must implement ICT change management procedures. All changes to ICT systems must be subject to formal approval by authorised personnel prior to implementation, with adequate testing and post-implementation review.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554",
+      "validated": "2026-01-15"
+    },
+    "fca_ps21_3": {
+      "title": "FCA PS21/3 — Building Operational Resilience",
+      "summary": "FCA-regulated firms must identify important business services, set impact tolerances, and ensure their change programmes do not breach those tolerances. Major releases affecting important business services require robust testing and rollback plans.",
+      "url": "https://www.fca.org.uk/publications/policy-statements/ps21-3-building-operational-resilience",
+      "validated": "2026-01-15"
+    },
+    "uk_gdpr_article_33": {
+      "title": "UK GDPR Article 33 — Personal data breach notification",
+      "summary": "Personal data breaches must be notified to the ICO within 72 hours of becoming aware. Releases that cause data breaches trigger this obligation. Controller must document all breaches.",
+      "url": "https://ico.org.uk/for-organisations/report-a-breach/",
+      "validated": "2026-01-15"
+    }
+  },
+
+  "dora_metrics": {
+    "source": "DORA Research Program — dora.dev",
+    "validated": "2026-01-15",
+    "bands": {
+      "deployment_frequency": {
+        "elite": "On-demand (multiple times per day)",
+        "high": "Between once per day and once per week",
+        "medium": "Between once per week and once per month",
+        "low": "Fewer than once per month"
+      },
+      "lead_time_for_changes": {
+        "elite": "Less than one hour",
+        "high": "Between one day and one week",
+        "medium": "Between one week and one month",
+        "low": "Between one month and six months"
+      },
+      "change_failure_rate": {
+        "elite": "0–5%",
+        "high": "5–10%",
+        "medium": "10–15%",
+        "low": "16–30%+"
+      },
+      "failed_deployment_recovery_time": {
+        "elite": "Less than one hour",
+        "high": "Less than one day",
+        "medium": "Between one day and one week",
+        "low": "Between one week and one month"
+      }
+    }
+  },
+
+  "glossary_additions": [],
+
+  "ai_rule_overrides": {
+    "_comment": "Override AI hint text and levels without editing the HTML. Match the 'id' field on RELEASE_AI_RULES and DEFECT_AI_RULES. Update when regulatory guidance changes.",
+    "_example_structure": {
+      "payment": {
+        "hint": "Updated hint text referencing new regulatory guidance...",
+        "level": "danger"
+      }
+    }
+  },
+
+  "framework_updates": [
+    {
+      "framework": "EU DORA",
+      "update": "Regulation (EU) 2022/2554 in force from 17 January 2025. Article 9 change management obligations apply to all in-scope financial entities. ICT change management procedures must include formal approval by authorised personnel prior to implementation.",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554",
+      "validated": "2026-05-29"
+    },
+    {
+      "framework": "ITIL 4",
+      "update": "ITIL 4 Release Management practice guide current edition. AXELOS publish periodic updates — verify at axelos.com for any amendments since this content version.",
+      "url": "https://www.axelos.com",
+      "validated": "2026-05-29"
+    },
+    {
+      "framework": "DORA Metrics",
+      "update": "DORA 2024 State of DevOps Report published. Key finding: elite performers deploy on-demand with CFR below 5% and MTTR under 1 hour. See dora.dev for updated performance bands.",
+      "url": "https://dora.dev",
+      "validated": "2026-05-29"
+    },
+    {
+      "framework": "SAFe",
+      "update": "SAFe 6.0 is the current edition. SAFe 5.x guidance remains broadly applicable. Verify framework version with your SAFe Practice Consultant.",
+      "url": "https://scaledagileframework.com",
+      "validated": "2026-05-29"
+    }
+  ],
+
+  "platform_notes": {
+    "jira_note": "Jira REST API v3 field names current as of 2026. Project-specific field IDs (customfield_xxxxx) vary by instance.",
+    "ado_note": "Azure DevOps REST API 7.1 current as of 2026. Work item type and field names vary by process template (Agile, Scrum, CMMI).",
+    "servicenow_note": "ServiceNow change management table: change_request. Key fields: short_description, description, risk, impact, assignment_group, cmdb_ci, planned_start_date, planned_end_date.",
+    "validated": "2026-05-29"
+  }
+}

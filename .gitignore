@@ -1,0 +1,15 @@
+# Claude Code local config — do not publish
+.claude/
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# macOS (if ever synced)
+.DS_Store
+
+# Editor temp files
+*.swp
+*.bak
+*~

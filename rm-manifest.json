@@ -1,0 +1,40 @@
+{
+  "name": "Release Management Intelligence Tool",
+  "short_name": "RM Tool",
+  "description": "Release planning, quality gates, defect triage, environment tracking and stakeholder reporting.",
+  "start_url": "./rm-tool-v1.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07100d",
+  "theme_color": "#10b981",
+  "orientation": "any",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='24' fill='%2310b981'/%3E%3Cpolyline points='170 54 104 120 66 82 16 132' stroke='white' stroke-width='14' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpolyline points='124 54 170 54 170 100' stroke='white' stroke-width='14' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='64' fill='%2310b981'/%3E%3Cpolyline points='454 144 278 320 176 218 42 352' stroke='white' stroke-width='36' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpolyline points='330 144 454 144 454 268' stroke='white' stroke-width='36' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Release",
+      "short_name": "New Release",
+      "description": "Plan a new release",
+      "url": "./rm-tool-v1.html#planner"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Release dashboard",
+      "url": "./rm-tool-v1.html"
+    }
+  ]
+}
