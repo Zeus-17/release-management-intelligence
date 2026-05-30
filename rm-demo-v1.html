@@ -906,10 +906,7 @@ sceneStart=performance.now();
 initScene(0);
 animFrame=requestAnimationFrame(tick);
 
-// Hypercare clock on scene 0 (just for title scene loop)
-var hh0=71,mm0=24,ss0=18;
-setInterval(function(){ss0--;if(ss0<0){ss0=59;mm0--;}if(mm0<0){mm0=59;hh0--;}
-  var el=document.getElementById('hcClock');if(el)el.textContent=pad(hh0)+':'+pad(mm0)+':'+pad(ss0);},1000);
+// hcClock is managed by initScene(2) only — no global interval needed
 </script>
 </body>
 </html>
