@@ -11,7 +11,7 @@
 
 A professional, local-first release planning and governance tool. Not a replacement for ServiceNow or Jira — a force multiplier that helps you think clearly, move faster, and leave an audit trail before fighting with your enterprise systems.
 
-🔗 **[Launch the tool](https://Zeus-17.github.io/release-management-intelligence/)** &nbsp;|&nbsp; **[View the showcase](https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html)**
+🔗 **[Launch the tool](https://Zeus-17.github.io/release-management-intelligence/)** &nbsp;|&nbsp; **[Watch the demo](https://Zeus-17.github.io/release-management-intelligence/rm-demo-v1.html)** &nbsp;|&nbsp; **[View the showcase](https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html)**
 
 ---
 
