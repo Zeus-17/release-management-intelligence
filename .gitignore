@@ -1,6 +1,15 @@
 # Claude Code local config — do not publish
 .claude/
 
+# Private — local only, never publish
+linkedin-post.txt
+HOW-TO.md
+instructions*.md
+instructions*.txt
+notes*.md
+notes*.txt
+drafts/
+
 # Windows
 Thumbs.db
 Desktop.ini
