@@ -31,7 +31,7 @@
     "dora_article_9": {
       "title": "DORA Article 9 — ICT security policies, procedures, protocols and tools",
       "summary": "Financial entities must implement ICT change management procedures. All changes to ICT systems must be subject to formal approval by authorised personnel prior to implementation, with adequate testing and post-implementation review.",
-      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554",
+      "url": "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
       "validated": "2026-01-15"
     },
     "fca_ps21_3": {
@@ -95,7 +95,7 @@
     {
       "framework": "EU DORA",
       "update": "Regulation (EU) 2022/2554 in force from 17 January 2025. Article 9 change management obligations apply to all in-scope financial entities. ICT change management procedures must include formal approval by authorised personnel prior to implementation.",
-      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554",
+      "url": "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
       "validated": "2026-05-29"
     },
     {

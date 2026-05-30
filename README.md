@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/badge/version-v1.6-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/)
 [![ITIL 4](https://img.shields.io/badge/ITIL_4-Current_Edition-6366f1?style=flat-square)](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation)
 [![DORA Metrics](https://img.shields.io/badge/DORA_Metrics-Four_Keys-38bdf8?style=flat-square)](https://dora.dev/guides/dora-metrics/)
-[![EU DORA](https://img.shields.io/badge/EU_DORA-Digital_Operational_Resilience_Act-f59e0b?style=flat-square)](https://www.eba.europa.eu/regulation-and-policy/operational-resilience/digital-operational-resilience-act-dora)
+[![EU DORA](https://img.shields.io/badge/EU_DORA-Digital_Operational_Resilience_Act-f59e0b?style=flat-square)](https://eur-lex.europa.eu/eli/reg/2022/2554/oj)
 [![SAFe](https://img.shields.io/badge/SAFe-6.0-8b5cf6?style=flat-square)](https://scaledagileframework.com)
 [![WCAG AA](https://img.shields.io/badge/WCAG-AA_Compliant-10b981?style=flat-square)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![Local First](https://img.shields.io/badge/Local--First-No_Signup_Required-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/HOW-TO-RUN-LOCALLY.md)
@@ -55,7 +55,7 @@ The tool covers the full release lifecycle, from first planning to formal PIR si
 |---|---|
 | **ITIL 4 (current edition)** | Release Management practice, gate criteria, change types, PIR and CAB. Source: [axelos.com](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation) |
 | **DORA Metrics (Four Keys)** | Deployment frequency, lead time for changes, change failure rate and MTTR tracked on the dashboard. Source: [dora.dev](https://dora.dev/guides/dora-metrics/) |
-| **EU DORA (Digital Operational Resilience Act)** | Regulation (EU) 2022/2554, in force January 2025. Article 9 ICT change management obligations surface as regulatory flags in AI rules and gate guidance. Source: [EBA](https://www.eba.europa.eu/regulation-and-policy/operational-resilience/digital-operational-resilience-act-dora) |
+| **EU DORA (Digital Operational Resilience Act)** | Regulation (EU) 2022/2554, in force January 2025. Article 9 ICT change management obligations surface as regulatory flags in AI rules and gate guidance. Source: [EUR-Lex (Official Journal)](https://eur-lex.europa.eu/eli/reg/2022/2554/oj) |
 | **SAFe 6.0** | Jira Align and Portfolio Epic support in golden thread and tracking references. Source: [scaledagileframework.com](https://scaledagileframework.com) |
 | **FCA PS21/3** | Operational resilience awareness in gate guidance. Source: [fca.org.uk](https://www.fca.org.uk/publications/policy-statements/ps21-3-building-operational-resilience) |
 | **UK GDPR / ICO** | GDPR keyword detection in AI rules and 72-hour notification awareness. Source: [ico.org.uk](https://ico.org.uk/for-organisations/report-a-breach/) |
