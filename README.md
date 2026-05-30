@@ -1,11 +1,12 @@
 # Release Management Intelligence Tool
 
-[![Version](https://img.shields.io/badge/version-v1.6-10b981?style=flat-square)](rm-tool-v1.html)
-[![ITIL 4](https://img.shields.io/badge/ITIL_4-current_edition-6366f1?style=flat-square)](https://www.axelos.com)
-[![DORA](https://img.shields.io/badge/DORA-aligned-38bdf8?style=flat-square)](https://dora.dev)
-[![EU DORA](https://img.shields.io/badge/EU_DORA-Art.9_aware-f59e0b?style=flat-square)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R2554)
-[![WCAG AA](https://img.shields.io/badge/WCAG-AA_compliant-10b981?style=flat-square)](https://www.w3.org/WAI/WCAG21/)
-[![Local First](https://img.shields.io/badge/local--first-no_signup-10b981?style=flat-square)]()
+[![Version](https://img.shields.io/badge/version-v1.6-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/)
+[![ITIL 4](https://img.shields.io/badge/ITIL_4-Current_Edition-6366f1?style=flat-square)](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation)
+[![DORA Metrics](https://img.shields.io/badge/DORA_Metrics-Four_Keys-38bdf8?style=flat-square)](https://dora.dev/guides/dora-metrics/)
+[![EU DORA](https://img.shields.io/badge/EU_DORA-Digital_Operational_Resilience_Act-f59e0b?style=flat-square)](https://www.eba.europa.eu/regulation-and-policy/operational-resilience/digital-operational-resilience-act-dora)
+[![SAFe](https://img.shields.io/badge/SAFe-6.0-8b5cf6?style=flat-square)](https://scaledagileframework.com)
+[![WCAG AA](https://img.shields.io/badge/WCAG-AA_Compliant-10b981?style=flat-square)](https://www.w3.org/WAI/WCAG21/quickref/)
+[![Local First](https://img.shields.io/badge/Local--First-No_Signup_Required-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/HOW-TO-RUN-LOCALLY.md)
 
 **Operational intelligence for Release Managers, Service Managers, Technical POs, Delivery Leads and anyone responsible for coordinating software delivery across complex environments.**
 
@@ -52,12 +53,12 @@ The tool covers the full release lifecycle — from first planning to formal PIR
 
 | Framework | Scope |
 |---|---|
-| **ITIL 4 (current edition)** | Release Management practice, gate criteria, change types, PIR, CAB |
-| **DORA Four Keys** | Deployment frequency, lead time, change failure rate, MTTR — tracked on dashboard |
-| **SAFe 6.0** | Jira Align / Portfolio Epic support in golden thread and tracking references |
-| **EU DORA (Reg. 2022/2554)** | Article 9 change management awareness throughout; regulatory flags in AI rules |
-| **FCA PS21/3** | Operational resilience awareness in gate guidance and regulatory content |
-| **UK GDPR / ICO** | GDPR keyword detection in AI rules; 72-hour notification awareness |
+| **ITIL 4 (current edition)** | Release Management practice, gate criteria, change types, PIR, CAB — [axelos.com](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation) |
+| **DORA Metrics (Four Keys)** | Deployment frequency, lead time for changes, change failure rate, MTTR — tracked on the dashboard. Source: [dora.dev](https://dora.dev/guides/dora-metrics/) |
+| **EU DORA — Digital Operational Resilience Act** | Regulation (EU) 2022/2554, in force January 2025. Article 9 ICT change management obligations surface as regulatory flags in the AI rules and gate guidance. Source: [EBA](https://www.eba.europa.eu/regulation-and-policy/operational-resilience/digital-operational-resilience-act-dora) |
+| **SAFe 6.0** | Jira Align / Portfolio Epic support in golden thread and tracking references — [scaledagileframework.com](https://scaledagileframework.com) |
+| **FCA PS21/3** | Operational resilience awareness in gate guidance — [fca.org.uk](https://www.fca.org.uk/publications/policy-statements/ps21-3-building-operational-resilience) |
+| **UK GDPR / ICO** | GDPR keyword detection in AI rules; 72-hour notification awareness — [ico.org.uk](https://ico.org.uk/for-organisations/report-a-breach/) |
 
 > Practice definitions are held in the updateable content layer (`rm-content-v1.json`). As ITIL evolves, guidance updates automatically — no app changes required.
 
