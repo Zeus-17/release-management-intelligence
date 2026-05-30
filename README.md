@@ -96,18 +96,23 @@ All names, icons and categories are **fully customisable in Settings**. Add SAP,
 
 ## Getting started
 
-**No installation. No signup. No server.**
+**Three ways to use it:**
 
-```
-1. Open rm-tool-v1.html in any modern browser
-2. The welcome screen gives you four options:
-   - Take the guided tour (13 steps, ~3 minutes)
-   - Load a practice scenario (6 to choose from)
-   - Create your first release
-   - Browse the reference library
-```
+| Option | How | Best for |
+|---|---|---|
+| **Online** | [Open in browser →](https://Zeus-17.github.io/release-management-intelligence/) | Most users — always the latest version, auto-updates silently |
+| **Desktop app (PWA)** | Visit in Chrome/Edge → click ⊞ in address bar → Install | Offline use — works without internet after first install |
+| **Local download** | Download HTML + run `python -m http.server 3031` | Corporate / air-gapped environments |
 
-**Or open directly:** [https://Zeus-17.github.io/release-management-intelligence/](https://Zeus-17.github.io/release-management-intelligence/)
+📖 **[Full setup guide](HOW-TO-RUN-LOCALLY.md)**
+
+Once open, the welcome screen gives you four options:
+- Take the guided tour (13 steps, ~3 minutes)
+- Load a practice scenario (6 realistic, fully pre-loaded)
+- Create your first release
+- Browse the reference library
+
+**Auto-updates:** When using online or PWA, the service worker automatically clears cached files and loads the latest version every time you open it. No action needed.
 
 ---
 
