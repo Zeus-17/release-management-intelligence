@@ -975,6 +975,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <div id="hypercareChecklist" style="flex:1;min-width:200px;"></div>
     <div style="display:flex;flex-direction:column;gap:6px;">
       <button class="btn btn-secondary btn-sm" onclick="openModal('hypercareModal')">View details</button>
+      <button class="btn btn-secondary btn-sm" onclick="openITSMFromHypercare()" title="Open ITSM Workflow Intelligence with release context pre-filled" style="border-color:rgba(59,130,246,0.4);color:#93c5fd;">🔔 Log incident</button>
       <button class="btn btn-primary btn-sm" onclick="endHypercare()">✓ All Clear</button>
     </div>
   </div>
@@ -1999,6 +2000,10 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
         &nbsp;·&nbsp;
         <a href="https://github.com/Zeus-17/release-management-intelligence" target="_blank" style="color:var(--accent);font-size:11px;">GitHub ↗</a>
       </div>
+      <div style="margin-top:10px;padding:10px 12px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:7px;font-size:11px;color:var(--text2);">
+        <strong style="color:var(--text);">Companion tool:</strong> Also from James Holford — <a href="https://zeus-17.github.io/itsm-workflow-intelligence/" target="_blank" style="color:#93c5fd;">ITSM Workflow Intelligence Tool ↗</a><br>
+        Structured incident, change and problem management with regulatory guidance. Works alongside this tool during P1 incidents and post-deployment events.
+      </div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
         <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;">Use offline / download</div>
         <div style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:8px;">
@@ -2489,6 +2494,13 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
       <button class="modal-close" onclick="closeModal('hypercareModal')">×</button>
     </div>
     <div id="hypercareModalBody"></div>
+    <div class="hint-banner hint-info" style="margin-top:14px;font-size:11px;">
+      <strong>P1 during Hypercare?</strong> The ITSM Workflow Intelligence tool handles incident response — it will open pre-filled with this release's context.
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="openITSMFromHypercare()">🔔 Open ITSM Tool — pre-filled</button>
+        <button class="copy-btn" onclick="copyRollbackForBridge()">📋 Copy rollback for incident bridge</button>
+      </div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('hypercareModal')">Close</button>
       <button class="btn btn-danger" onclick="endHypercare()">End Hypercare Early</button>
@@ -7642,6 +7654,73 @@ function renderBlackoutList(){
       <button class="tref-del" onclick="deleteBlackout('${b.id}')" title="Remove">×</button>
     </div>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  COMPANION TOOL INTEGRATION — ITSM Workflow Intelligence
+// ═══════════════════════════════════════════════════════
+const ITSM_TOOL_URL = 'https://zeus-17.github.io/itsm-workflow-intelligence/';
+
+function openITSMFromHypercare(){
+  // Opens the ITSM tool with release context pre-filled in the incident form.
+  // Uses the ITSM tool's documented URL parameter interface:
+  // ?service= ?observation= ?sev= ?shortdesc=
+  let url = ITSM_TOOL_URL;
+  if(_hypercareData){
+    const rel = STATE.releases.find(r=>r.id===_hypercareData.rid);
+    if(rel){
+      const dms = (rel.deliveryModels||[]).map(d=>getDMLabel(d)).join(', ');
+      const components = (rel.components||[]).map(c=>c.name).join(', ');
+      const observation = `Post-deployment incident during Hypercare for "${rel.name}". `+
+        `Delivery: ${dms||'—'}. `+
+        (components?`Components: ${components}. `:'')+
+        `Rollback runbook available in Release Management Intelligence tool. `+
+        `Check deferred defects and release scope before assuming root cause.`;
+      const params = new URLSearchParams({
+        service:   rel.name,
+        shortdesc: `[Hypercare P1] ${rel.name}`,
+        sev:       'P1',
+        observation
+      });
+      url = ITSM_TOOL_URL + '?' + params.toString();
+    }
+  }
+  window.open(url, '_blank');
+}
+
+function copyRollbackForBridge(){
+  // Copies the release rollback runbook in incident bridge format.
+  if(!_hypercareData){ showToast('No active Hypercare session.','warn',2000); return; }
+  const rel = STATE.releases.find(r=>r.id===_hypercareData.rid);
+  if(!rel){ showToast('Release not found.','warn',2000); return; }
+  const runbook = rel.runbook||[];
+  const rollbackSteps = runbook.filter(s=>s.type==='rollback');
+  const org = STATE.settings.org||'[Organisation]';
+  const text =
+`ROLLBACK RUNBOOK — INCIDENT BRIDGE USE
+${org} · ${rel.name}
+${'─'.repeat(50)}
+
+RELEASE:   ${rel.name}
+TYPE:      ${rel.type?.toUpperCase()||'—'}
+DELIVERY:  ${(rel.deliveryModels||[]).map(d=>getDMLabel(d)).join(', ')||'—'}
+
+ROLLBACK STEPS:
+${rollbackSteps.length
+  ? rollbackSteps.map((s,i)=>`  ${i+1}. [ROLLBACK] ${s.description} — Owner: ${s.owner||'—'}`).join('\n')
+  : '  No rollback steps defined in release runbook. Refer to delivery model guidance below.'}
+
+DELIVERY MODEL ROLLBACK GUIDANCE:
+${(rel.deliveryModels||[]).map(dm=>{
+  const g = DM_GUIDANCE[dm]||{};
+  return `  ${g.icon||''} ${g.label||dm}: ${g.notes?.split('Rollback')[1]?.split('.')[0]||'See runbook.'}`;
+}).join('\n')||'  No delivery models specified.'}
+
+SOURCE: Release Management Intelligence Tool · ${rel.rm||'Release Manager'}`;
+
+  navigator.clipboard.writeText(text).then(()=>{
+    showToast('Rollback runbook copied — paste into incident bridge.','success',3500);
+  });
 }
 
 // ═══════════════════════════════════════════════════════

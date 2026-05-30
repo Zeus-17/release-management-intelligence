@@ -162,6 +162,16 @@ See [LICENSE](LICENSE) for full terms.
 
 ---
 
+## Related tools
+
+**[ITSM Workflow Intelligence Tool](https://zeus-17.github.io/itsm-workflow-intelligence/)** — also by James Holford.
+
+Structured incident, change and problem management. P1 Fast Track, standalone Change Request, PIR and retrospective with full ServiceNow and Jira output. ITIL 4, FCA and EU DORA aligned.
+
+The two tools are designed to work alongside each other. Use ITSM for incidents and operational events; use this tool for release planning and governance. During Hypercare, the RM tool provides a direct link to open the ITSM tool with release context pre-filled.
+
+---
+
 ## Author
 
 **James Holford** — Senior Service Delivery & Technology Operations Leader
