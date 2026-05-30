@@ -11,7 +11,7 @@
 
 A professional, local-first release planning and governance tool. Not a replacement for ServiceNow or Jira — a force multiplier that helps you think clearly, move faster, and leave an audit trail before fighting with your enterprise systems.
 
-🔗 **[Launch the tool](https://zeus-17.github.io/release-management-intelligence/)** &nbsp;|&nbsp; **[View the showcase](https://zeus-17.github.io/release-management-intelligence/rm-showcase.html)**
+🔗 **[Launch the tool](https://Zeus-17.github.io/release-management-intelligence/)** &nbsp;|&nbsp; **[View the showcase](https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html)**
 
 ---
 
@@ -107,7 +107,7 @@ All names, icons and categories are **fully customisable in Settings**. Add SAP,
    - Browse the reference library
 ```
 
-**Or open directly:** [https://zeus-17.github.io/release-management-intelligence/](https://zeus-17.github.io/release-management-intelligence/)
+**Or open directly:** [https://Zeus-17.github.io/release-management-intelligence/](https://Zeus-17.github.io/release-management-intelligence/)
 
 ---
 

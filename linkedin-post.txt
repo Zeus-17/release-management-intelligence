@@ -36,8 +36,8 @@ ITIL 4 aligned. DORA metrics tracked. EU DORA Article 9 aware. WCAG AA accessibl
 
 This is what I mean when I say I'm actively upskilling — not just taking courses, but building real things with AI that solve real operational problems.
 
-🔗 Try it: [GITHUB PAGES URL]
-📖 View the showcase: [SHOWCASE URL]
+🔗 Try it: https://Zeus-17.github.io/release-management-intelligence/
+📖 View the showcase: https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html
 
 I'd love to hear from Release Managers, SMs, PMs and Delivery Leads — does this solve problems you actually have?
 
@@ -73,7 +73,7 @@ Not a replacement for ServiceNow or Jira — a force multiplier. The tool you us
 
 This is what upskilling looks like when you combine 20+ years of service delivery experience with AI-assisted product development.
 
-🔗 [GITHUB PAGES URL]
+🔗 https://Zeus-17.github.io/release-management-intelligence/
 
 #ReleaseManagement #ServiceDelivery #ITIL4 #DORA #OpenSource #AI #TechLeadership
 
@@ -84,8 +84,8 @@ COMMENT TO ADD (first comment on the post)
 
 For anyone who wants to dig in:
 
-→ The showcase walks through every feature: [SHOWCASE URL]
-→ The source is on GitHub: [GITHUB REPO URL]
+→ The showcase walks through every feature: https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html
+→ The source is on GitHub: https://github.com/Zeus-17/release-management-intelligence
 → There's a guided tour built in — takes about 3 minutes and covers all 13 tabs
 
 If you work in release management, service delivery, programme management or platform engineering — I'd particularly love your feedback. What would you add? What have I missed?
@@ -95,9 +95,9 @@ If you work in release management, service delivery, programme management or pla
 NOTES FOR JAMES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-- Replace [GITHUB PAGES URL] with: https://zeus-17.github.io/release-management-intelligence/
-- Replace [SHOWCASE URL] with: https://zeus-17.github.io/release-management-intelligence/rm-showcase.html
-- Replace [GITHUB REPO URL] with: https://github.com/zeus-17/release-management-intelligence
+- Replace https://Zeus-17.github.io/release-management-intelligence/ with: https://zeus-17.github.io/release-management-intelligence/
+- Replace https://Zeus-17.github.io/release-management-intelligence/rm-showcase.html with: https://zeus-17.github.io/release-management-intelligence/rm-showcase.html
+- Replace https://github.com/Zeus-17/release-management-intelligence with: https://github.com/zeus-17/release-management-intelligence
 - Consider recording a 60-90 second screen capture of the Go/No-Go Wizard or Hypercare Mode and attaching to the post — video significantly outperforms text-only on LinkedIn
 - Post V1 as the main post, add the Comment immediately after posting
 - Best days/times for LinkedIn engagement: Tuesday–Thursday, 08:00–10:00 or 17:00–18:30 UK time
