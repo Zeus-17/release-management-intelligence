@@ -3400,6 +3400,7 @@ function saveDefect(){
   const cs = document.getElementById('def-comp-select'); if(cs) cs.value = '';
   renderDefects();
   updateBadges();
+  syncBlockerKPI();
   showToast(`Defect "${title}" logged.`, 'success', 2500);
 }
 
@@ -3474,6 +3475,16 @@ function deleteDefect(id){
   persistState();
   renderDefects();
   updateBadges();
+  syncBlockerKPI();
+}
+
+function syncBlockerKPI(){
+  // Keeps the dashboard KPI blocker count current without a full refreshDashboard()
+  const blockers = STATE.defects.filter(d=>d.classification==='blocker').length;
+  const el = document.getElementById('kpi-blockers');
+  if(!el) return;
+  el.textContent = blockers;
+  el.className = 'kpi-val ' + (blockers>0?'red':'green');
 }
 
 // ═══════════════════════════════════════════════════════
