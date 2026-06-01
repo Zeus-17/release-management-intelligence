@@ -7,11 +7,7 @@
     "next_review": "2026-08-29",
     "maintainer": "Increment content_version to YYYY-MM-DD when updating. This file is fetched on page load to check for newer content than the baked-in version in the HTML.",
     "last_checked_at": "2026-06-01",
-    "last_check_result": "clear",
-    "last_check_errors": [
-      "fca_ops: HTTP 422",
-      "ico_gdpr: HTTP 422"
-    ]
+    "last_check_result": "clear"
   },
   "content_warnings": [
     {
