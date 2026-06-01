@@ -2550,7 +2550,7 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
     </div>
     <div class="welcome-title">Release Management Intelligence</div>
     <div class="welcome-sub">
-      Your release planning, gate tracking, defect triage and stakeholder reporting — in one place.<br>
+      Your release planning, gate tracking, defect triage and stakeholder reporting. All in one place.<br>
       What would you like to do first?
     </div>
     <div class="welcome-choice-grid">
@@ -5002,12 +5002,14 @@ function loadSevScale(){
 }
 
 function saveSevScale(){
-  // Read from settings UI rows
+  // Read from settings UI rows — only update if rows exist (guard against empty overwrite)
   const rows = document.querySelectorAll('#sev-scale-rows .sev-scale-row');
-  _sevScale = Array.from(rows).map(row => ({
+  const parsed = Array.from(rows).map(row => ({
     key:   row.querySelector('.sev-key-input')?.value.trim().toLowerCase().replace(/\s+/g,'_') || '',
     label: row.querySelector('.sev-label-input')?.value.trim() || ''
   })).filter(s => s.key && s.label);
+  if(parsed.length === 0) return; // never overwrite with empty — Settings modal must be open
+  _sevScale = parsed;
   try{ localStorage.setItem(SEV_SCALE_KEY, JSON.stringify(_sevScale)); }catch(e){}
   populateSevDropdown();
 }
