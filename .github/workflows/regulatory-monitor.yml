@@ -114,9 +114,9 @@ jobs:
               name: 'FCA — operational resilience and incident notification',
               type: 'govuk',
               url:  'https://www.gov.uk/api/search.json' +
-                    '?filter_organisations=financial-conduct-authority' +
+                    '?filter_organisations[]=financial-conduct-authority' +
                     '&q=operational+resilience+incident+notification+SUP' +
-                    '&order=newest&count=10',
+                    '&order=-public_timestamp&count=10',
               keywords: [
                 'operational resilience', 'sup 15', 'notification',
                 'incident', 'important business service', 'dora',
@@ -133,7 +133,7 @@ jobs:
               url:  'https://www.gov.uk/api/search.json' +
                     '?filter_organisations=information-commissioners-office' +
                     '&q=breach+notification+GDPR+data+protection+reporting' +
-                    '&order=newest&count=10',
+                    '&order=-public_timestamp&count=10',
               keywords: [
                 'breach', 'notification', 'gdpr', 'data protection',
                 'personal data', '72 hour', 'ico guidance', 'reporting'
@@ -180,6 +180,20 @@ jobs:
                 title: r.title || 'New publication',
                 link:  r.link ? 'https://www.gov.uk' + r.link : ''
               });
+            }
+            return found;
+          }
+
+          // ── Parse HTML (ICO media centre — no RSS available) ────────
+          function parseHTML(body, keywords) {
+            const found = [];
+            // Extract article/link titles from HTML
+            const titleMatches = body.match(/<h[23][^>]*>(.*?)<\/h[23]>/gi) || [];
+            for (const match of titleMatches.slice(0, 30)) {
+              const text = match.replace(/<[^>]+>/g, '').trim().toLowerCase();
+              if (keywords.some(kw => text.includes(kw))) {
+                found.push({ title: match.replace(/<[^>]+>/g, '').trim(), link: '' });
+              }
             }
             return found;
           }
