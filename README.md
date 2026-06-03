@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/badge/version-v1.6-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/)
 [![ITIL 4](https://img.shields.io/badge/ITIL_4-Current_Edition-6366f1?style=flat-square)](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation)
 [![DORA Metrics](https://img.shields.io/badge/DORA_Metrics-Four_Keys-38bdf8?style=flat-square)](https://dora.dev/guides/dora-metrics/)
-[![EU DORA](https://img.shields.io/badge/EU_DORA-Digital_Operational_Resilience_Act-f59e0b?style=flat-square)](https://eur-lex.europa.eu/eli/reg/2022/2554/oj)
+[![EU DORA](https://img.shields.io/badge/EU_DORA-Digital_Operational_Resilience_Act-f59e0b?style=flat-square)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554)
 [![SAFe](https://img.shields.io/badge/SAFe-6.0-8b5cf6?style=flat-square)](https://scaledagileframework.com)
 [![WCAG AA](https://img.shields.io/badge/WCAG-AA_Compliant-10b981?style=flat-square)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![Local First](https://img.shields.io/badge/Local--First-No_Signup_Required-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/HOW-TO-RUN-LOCALLY.md)
@@ -55,7 +55,7 @@ The tool covers the full release lifecycle, from first planning to formal PIR si
 |---|---|
 | **ITIL 4 (current edition)** | Release Management practice, gate criteria, change types, PIR and CAB. Source: [axelos.com](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation) |
 | **DORA Metrics (Four Keys)** | Deployment frequency, lead time for changes, change failure rate and MTTR tracked on the dashboard. Source: [dora.dev](https://dora.dev/guides/dora-metrics/) |
-| **EU DORA (Digital Operational Resilience Act)** | Regulation (EU) 2022/2554, in force January 2025. Article 9 ICT change management obligations surface as regulatory flags in AI rules and gate guidance. Source: [EUR-Lex (Official Journal)](https://eur-lex.europa.eu/eli/reg/2022/2554/oj) |
+| **EU DORA (Digital Operational Resilience Act)** | Regulation (EU) 2022/2554, in force January 2025. Article 9 ICT change management obligations surface as regulatory flags in AI rules and gate guidance. Source: [EUR-Lex (Official Journal)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554) |
 | **SAFe 6.0** | Jira Align and Portfolio Epic support in golden thread and tracking references. Source: [scaledagileframework.com](https://scaledagileframework.com) |
 | **FCA PS21/3** | Operational resilience awareness in gate guidance. Source: [fca.org.uk](https://www.fca.org.uk/publications/policy-statements/ps21-3-building-operational-resilience) |
 | **UK GDPR / ICO** | GDPR keyword detection in AI rules and 72-hour notification awareness. Source: [ico.org.uk](https://ico.org.uk/for-organisations/report-a-breach/) |
@@ -137,14 +137,51 @@ The filename `rm-tool-v1.html` never changes. `v1` means Generation 1. The inter
 
 ---
 
-## Architecture
+## Technical approach
 
-This tool is deliberately simple:
+**Single file, zero dependencies**
+The entire application is a single `.html` file. No npm, no webpack, no Docker. Download it, open it in a browser and it works, including offline after first install.
 
-- **Single HTML file** — the entire application. No npm, no webpack, no Docker
-- **Content JSON** — framework guidance, glossary additions, AI rule overrides and regulatory notices. Updated independently of the app and fetched automatically on load
-- **localStorage** — all your data stays in your browser. Export JSON to back up and import to restore
-- **Service worker** — clears all caches on activate so every load gets the latest HTML from the network
+**Content layer**
+Framework guidance, ITIL practice definitions, AI rule overrides and regulatory notices live in a separate JSON file fetched on load and cached locally. When ITIL guidance or EU DORA obligations change, the JSON updates independently with no app change required.
+
+**Data architecture**
+Everything stays in your browser via `localStorage`. Nothing is ever transmitted to any server. Export JSON to back up and import to restore on any device.
+
+**Service worker**
+Clears all caches on activate so every load fetches fresh HTML from the network. No stale guidance, no old versions persisting for users.
+
+**Deterministic pattern recognition**
+The AI rules engine is rules-based, not generative. 17 keyword rules fire as you type with no API call, no external dependency and no data leaving the browser. In release management, explainable intelligence matters: every flag has a specific cause and can be dismissed by the user.
+
+**PWA support**
+Installable as a desktop or mobile app via Chrome or Edge. The manifest includes direct shortcuts to Planning, Go/No-Go and Reporting views.
+
+---
+
+## About this project
+
+This tool was designed and built as a demonstration of applied AI collaboration, senior release management domain expertise and product thinking. It was built iteratively with Claude (Anthropic) across an extended development process covering architecture, implementation, testing and refinement.
+
+**Domain expertise demonstrated**
+- Release lifecycle management from first planning to PIR sign-off
+- Quality gates, change approval processes and ECAB workflow
+- ITIL 4 Release Management practice aligned to current guidance
+- EU DORA Article 9 ICT change management obligations
+- FCA PS21/3 operational resilience in a release context
+- Defect triage, environment promotion and Go/No-Go decision frameworks
+- Risk register methodology with Likelihood x Impact scoring
+- Integration patterns across Jira, ServiceNow, Azure DevOps and GitHub
+- Governance reporting for Executive, Board and Ops audiences
+
+**Technical and AI literacy demonstrated**
+- Architecting and building a production-quality single-file application
+- Iterative product development with AI collaboration
+- Deterministic pattern recognition appropriate for a compliance context
+- Autonomous content delivery via versioned JSON and service worker cache strategy
+- Designing for time-pressured users across delivery and operations roles
+- Progressive disclosure, accessibility and mobile-first responsive layout
+- PWA implementation including manifest, service worker and install prompts
 
 ---
 
