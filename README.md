@@ -1,5 +1,6 @@
 # Release Management Intelligence Tool
 
+<!--
 [![Version](https://img.shields.io/badge/version-v1.6-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/)
 [![ITIL 4](https://img.shields.io/badge/ITIL_4-Current_Edition-6366f1?style=flat-square)](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation)
 [![DORA Metrics](https://img.shields.io/badge/DORA_Metrics-Four_Keys-38bdf8?style=flat-square)](https://dora.dev/guides/dora-metrics/)
@@ -7,6 +8,7 @@
 [![SAFe](https://img.shields.io/badge/SAFe-6.0-8b5cf6?style=flat-square)](https://scaledagileframework.com)
 [![WCAG AA](https://img.shields.io/badge/WCAG-AA_Compliant-10b981?style=flat-square)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![Local First](https://img.shields.io/badge/Local--First-No_Signup_Required-10b981?style=flat-square)](https://Zeus-17.github.io/release-management-intelligence/HOW-TO-RUN-LOCALLY.md)
+-->
 
 **Operational intelligence for Release Managers, Service Managers, Technical POs, Delivery Leads and anyone responsible for coordinating software delivery across complex environments.**
 
