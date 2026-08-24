@@ -6,8 +6,8 @@
     "changelog": "Initial content layer. Framework guidance validated against: ITIL 4 current edition (AXELOS/PeopleCert), DORA dora.dev 2024 State of DevOps, SAFe 6.0, EU DORA Regulation 2022/2554 (in force Jan 2025), FCA PS21/3 Operational Resilience, UK GDPR/ICO guidance. Review quarterly or when AXELOS, DORA, FCA or EBA publish material updates.",
     "next_review": "2026-08-29",
     "maintainer": "Increment content_version to YYYY-MM-DD when updating. This file is fetched on page load to check for newer content than the baked-in version in the HTML.",
-    "last_checked_at": "2026-08-17",
-    "last_check_result": "notices_found"
+    "last_checked_at": "2026-08-24",
+    "last_check_result": "clear"
   },
   "content_warnings": [
     {
