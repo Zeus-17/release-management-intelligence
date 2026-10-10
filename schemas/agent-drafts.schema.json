@@ -401,12 +401,113 @@
             "$ref": "#/$defs/Unresolved"
            }
           ]
+         },
+         "status": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "open",
+               "fix_identified",
+               "fix_in_progress",
+               "blocked",
+               "fixed_unverified",
+               "reopened",
+               "resolved_confirmed",
+               "deferred",
+               "accepted",
+               "wont_fix",
+               "duplicate",
+               "cannot_reproduce",
+               "not_a_defect"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ],
+          "description": "Lifecycle status (R-1). Absent means Open. A blocker counts only while unresolved: Open / Fix identified / Fix in progress / Blocked / Fixed - awaiting verification / Reopened, or Resolved without a named confirmer, or closed without a named decision-maker and reason."
+         },
+         "decisionRecorded": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "type": "boolean"
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ],
+          "description": "True only if a named decision-maker AND a reason are recorded (needed for Deferred, Accepted, Won't fix, Duplicate, Cannot reproduce, Not a defect to stop a blocker counting)."
+         },
+         "confirmationRecorded": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "type": "boolean"
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ],
+          "description": "True only if a named confirmer is recorded (needed for Resolved & confirmed to stop a blocker counting)."
          }
         },
         "additionalProperties": false,
         "required": [
          "releaseId",
-         "classification"
+         "classification",
+         "status",
+         "decisionRecorded",
+         "confirmationRecorded"
         ]
        }
       },
@@ -414,7 +515,7 @@
        "$ref": "#/$defs/Unresolved"
       }
      ],
-     "description": "Defects for THIS release. Only classification === 'blocker' counts; defect status is ignored by the engine."
+     "description": "Defects for THIS release. A defect counts as an open blocker per the tool's isUnresolvedBlocker(): classification === 'blocker' AND not (resolved with a named confirmer, or closed with a named decision-maker and reason)."
     },
     "envPath": {
      "oneOf": [

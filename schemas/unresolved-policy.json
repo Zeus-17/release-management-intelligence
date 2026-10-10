@@ -104,6 +104,30 @@
      "on_invalid": "reject",
      "rationale": "NOT conservative to default: an unresolved defect defaulted to non-blocker could hide a release blocker (30% of the score). Hard block."
     },
+    "defects[].status": {
+     "on_unresolved": "fallback",
+     "fallback_value": "open",
+     "caveat_code": "defect_status_treated_as_open",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: Open is counted as unresolved, which is also what the tool does for a defect with no status."
+    },
+    "defects[].decisionRecorded": {
+     "on_unresolved": "fallback",
+     "fallback_value": false,
+     "caveat_code": "decision_treated_as_unrecorded",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: a blocker closed without a KNOWN named decision-maker and reason still counts as open."
+    },
+    "defects[].confirmationRecorded": {
+     "on_unresolved": "fallback",
+     "fallback_value": false,
+     "caveat_code": "confirmation_treated_as_unrecorded",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: a blocker marked resolved without a KNOWN named confirmer still counts as open."
+    },
     "envPath": {
      "on_unresolved": "block",
      "reason_code": "env_path_missing",

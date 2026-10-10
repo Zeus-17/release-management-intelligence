@@ -47,6 +47,12 @@ def gate_ids(html):
     return re.findall(r"^  '([a-z-]+)': \{", html[i:j], re.M)
 
 
+def defect_status_ids(html):
+    i = html.index("const DEFECT_STATUS_DEFS = {")
+    j = html.index("};", i)
+    return re.findall(r"^  ([a-z_]+):\s+\{label:", html[i:j], re.M)
+
+
 def dm_ids(html):
     i = html.index("const DM_GUIDANCE = {")
     j = html.index("};", i)
@@ -57,6 +63,7 @@ def build_enums(html):
     e = {
         "RELEASE_TYPE": select_options(html, "rel-type"),
         "DEFECT_CLASS": select_options(html, "def-class"),
+        "DEFECT_STATUS": defect_status_ids(html),
         "DELIVERY_MODEL": dm_ids(html),
         "GATE_ID": gate_ids(html),
         # 'not-started' and 'pending' exist only in code (gate creation default / legacy state), the rest are in the gate <select>.
@@ -127,8 +134,11 @@ def engines(E):
                     "properties": {"id": {"enum": E["GATE_ID"]}, "status": {"enum": E["GATE_STATUS"]}, "signedBy": {"type": "string"}}}},
                 "defects": {"type": "array", "items": {
                     "type": "object", "required": ["releaseId", "classification"], "additionalProperties": False,
-                    "properties": {"releaseId": str_nonempty, "classification": {"enum": E["DEFECT_CLASS"]}}},
-                    "description": "Defects for THIS release. Only classification === 'blocker' counts; defect status is ignored by the engine."},
+                    "properties": {"releaseId": str_nonempty, "classification": {"enum": E["DEFECT_CLASS"]},
+                                   "status": {"enum": E["DEFECT_STATUS"], "description": "Lifecycle status (R-1). Absent means Open. A blocker counts only while unresolved: Open / Fix identified / Fix in progress / Blocked / Fixed - awaiting verification / Reopened, or Resolved without a named confirmer, or closed without a named decision-maker and reason."},
+                                   "decisionRecorded": {"type": "boolean", "description": "True only if a named decision-maker AND a reason are recorded (needed for Deferred, Accepted, Won't fix, Duplicate, Cannot reproduce, Not a defect to stop a blocker counting)."},
+                                   "confirmationRecorded": {"type": "boolean", "description": "True only if a named confirmer is recorded (needed for Resolved & confirmed to stop a blocker counting)."}}},
+                    "description": "Defects for THIS release. A defect counts as an open blocker per the tool's isUnresolvedBlocker(): classification === 'blocker' AND not (resolved with a named confirmer, or closed with a named decision-maker and reason)."},
                 "envPath": {"type": "array", "minItems": 1, "uniqueItems": True, "items": {"enum": E["ENV"]}},
                 "environments": {"type": "array", "items": {
                     "type": "object", "required": ["env", "health"], "additionalProperties": False,
@@ -231,6 +241,9 @@ def policy():
         "defects": B("defect_list_unknown", "If the defect list is unknown the 30% defect component cannot be computed; defaulting to 'no defects' would score a possibly-blocked release as clear."),
         "defects[].releaseId": B("defect_release_unknown", "A defect that cannot be attributed to a release cannot be included or excluded safely."),
         "defects[].classification": B("defect_classification_unknown", "NOT conservative to default: an unresolved defect defaulted to non-blocker could hide a release blocker (30% of the score). Hard block."),
+        "defects[].status": F("open", "defect_status_treated_as_open", "Conservative: Open is counted as unresolved, which is also what the tool does for a defect with no status."),
+        "defects[].decisionRecorded": F(False, "decision_treated_as_unrecorded", "Conservative: a blocker closed without a KNOWN named decision-maker and reason still counts as open."),
+        "defects[].confirmationRecorded": F(False, "confirmation_treated_as_unrecorded", "Conservative: a blocker marked resolved without a KNOWN named confirmer still counts as open."),
         "envPath": B("env_path_missing", "With an empty path the old engine divided by zero and returned NaN. Since Q-8 (2026-10-10) the tool itself reports 'not assessed'; the agent path refuses to produce a score as well.", on_invalid="block_as_missing"),
         "environments": F([], "environments_treated_as_unknown", "Conservative: an environment with no health reading scores exactly like 'unknown' (not healthy)."),
         "environments[].env": B("environment_identity_missing", "Cannot place a health reading in the path."),
@@ -277,7 +290,7 @@ def cases():
     return [
         {"id": "readiness-all-resolved", "engine": "readiness",
          "draft": {"gates": [gate_ok("dev-complete"), gate_ok("gng", "pending", "")],
-                   "defects": [{"releaseId": R("REL-1"), "classification": R("blocker")}],
+                   "defects": [{"releaseId": R("REL-1"), "classification": R("blocker"), "status": R("open"), "decisionRecorded": R(False), "confirmationRecorded": R(False)}],
                    "envPath": R(["DEV", "PROD"]),
                    "environments": [{"env": R("DEV"), "health": R("healthy")}, {"env": R("PROD"), "health": R("unknown")}]},
          "expect": {"status": "ready", "caveats": []}},
@@ -292,7 +305,7 @@ def cases():
                     "engine_input_contains": {"gates[0].status": "not-started", "environments[0].health": "unknown"}}},
         {"id": "readiness-unresolved-defect-classification-blocks", "engine": "readiness",
          "draft": {"gates": [gate_ok("dev-complete")],
-                   "defects": [{"releaseId": R("REL-1"), "classification": U("unknown_to_user")}],
+                   "defects": [{"releaseId": R("REL-1"), "classification": U("unknown_to_user"), "status": R("open"), "decisionRecorded": R(False), "confirmationRecorded": R(False)}],
                    "envPath": R(["DEV"]), "environments": [{"env": R("DEV"), "health": R("healthy")}]},
          "expect": {"status": "cannot_be_determined", "missing": [{"field": "defects[0].classification", "reason_code": "defect_classification_unknown"}]}},
         {"id": "readiness-no-gates-blocks", "engine": "readiness",

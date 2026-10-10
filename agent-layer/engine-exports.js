@@ -39,7 +39,7 @@
   var TOOL = 'rm';
 
   /** The tool's own tables and PURE helper functions, referenced BY NAME in the global scope at call time (never copied). */
-  var REQUIRED = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES', 'GATE_DEFS', 'stripNegatedTerms', 'matchedTextOf'];
+  var REQUIRED = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES', 'GATE_DEFS', 'stripNegatedTerms', 'matchedTextOf', 'isUnresolvedBlocker'];
 
   function table(name) {
     switch (name) {
@@ -48,6 +48,7 @@
       case 'GATE_DEFS': return typeof GATE_DEFS !== 'undefined' ? GATE_DEFS : null;                      // eslint-disable-line no-undef
       case 'stripNegatedTerms': return typeof stripNegatedTerms === 'function' ? stripNegatedTerms : null; // eslint-disable-line no-undef
       case 'matchedTextOf': return typeof matchedTextOf === 'function' ? matchedTextOf : null;            // eslint-disable-line no-undef
+      case 'isUnresolvedBlocker': return typeof isUnresolvedBlocker === 'function' ? isUnresolvedBlocker : null; // eslint-disable-line no-undef
       default: return null;
     }
   }
@@ -146,7 +147,12 @@
     var gatesTotal = gates.length || 1;
     var gatesDone = gates.filter(function (g) { return g.status === 'passed' || g.status === 'waived'; }).length;
     var gatesPct = Math.round((gatesDone / gatesTotal) * 100);
-    var blockers = (input.defects || []).filter(function (d) { return d.classification === 'blocker'; }).length;
+    // R-1: the tool's own rule decides what is an open blocker. The input only says WHETHER a named decision / confirmation is recorded (never who or why), so a stand-in record is built for the tool's helper.
+    var isOpenBlocker = table('isUnresolvedBlocker');
+    var blockers = (input.defects || []).filter(function (d) {
+      return isOpenBlocker({ classification: d.classification, status: d.status,
+        decision: d.decisionRecorded ? { by: 'recorded', reason: 'recorded' } : null, confirmation: d.confirmationRecorded ? { by: 'recorded' } : null });
+    }).length;
     var defectScore = blockers === 0 ? 100 : blockers === 1 ? 60 : blockers === 2 ? 30 : 0;
     var envs = input.envPath;
     var envObj = {};

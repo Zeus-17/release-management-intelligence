@@ -51,6 +51,21 @@
        "state": "resolved",
        "value": "blocker",
        "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "open",
+       "provenance": "user_confirmed"
+      },
+      "decisionRecorded": {
+       "state": "resolved",
+       "value": false,
+       "provenance": "user_confirmed"
+      },
+      "confirmationRecorded": {
+       "state": "resolved",
+       "value": false,
+       "provenance": "user_confirmed"
       }
      }
     ],
@@ -192,6 +207,21 @@
       "classification": {
        "state": "unresolved",
        "reason": "unknown_to_user"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "open",
+       "provenance": "user_confirmed"
+      },
+      "decisionRecorded": {
+       "state": "resolved",
+       "value": false,
+       "provenance": "user_confirmed"
+      },
+      "confirmationRecorded": {
+       "state": "resolved",
+       "value": false,
+       "provenance": "user_confirmed"
       }
      }
     ],
@@ -715,6 +745,21 @@
    "deferred",
    "known",
    "wontfix"
+  ],
+  "DEFECT_STATUS": [
+   "open",
+   "fix_identified",
+   "fix_in_progress",
+   "blocked",
+   "fixed_unverified",
+   "reopened",
+   "resolved_confirmed",
+   "deferred",
+   "accepted",
+   "wont_fix",
+   "duplicate",
+   "cannot_reproduce",
+   "not_a_defect"
   ],
   "DELIVERY_MODEL": [
    "cloud",

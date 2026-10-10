@@ -109,7 +109,7 @@ function textOf(el){ return el ? el.textContent.replace(/\s+/g,' ').trim() : nul
 async function runAll(){
   const frame = document.getElementById('tool');
   const win = frame.contentWindow, doc = frame.contentDocument;
-  const R = {meta:{}, release:{}, defect:{}, readiness:{}, bands:{}, gateSets:{}, gateHints:{}};
+  const R = {meta:{}, release:{}, defect:{}, readiness:{}, bands:{}, gateSets:{}, gateHints:{}, lifecycle:{}};
 
   R.meta.toolFile = 'rm-tool-v1.html';
   R.meta.releaseRuleCount = win.eval('RELEASE_AI_RULES.length');
@@ -171,6 +171,43 @@ async function runAll(){
     const defects = Array.from({length:h.blockers}, (_,i)=>({id:'d'+i, releaseId:'REL-T', classification:'blocker'}));
     win.eval('STATE.defects = ' + JSON.stringify(defects));
     R.gateHints[h.id] = win.getGateReadinessHint(h.rel, h.gate);
+  }
+  win.eval('STATE.defects = ' + savedDefects);
+
+  // --- R-1 defect lifecycle: the open-blocker rule for every status, with and without the named record; a scripted life; readiness and gate hint that follow it ---
+  const statusKeys = Object.keys(win.eval('DEFECT_STATUS_DEFS'));
+  R.lifecycle.rule = {};
+  for(const k of statusKeys){
+    const mk = (extra)=>Object.assign({id:'x', releaseId:'REL-T', classification:'blocker', status:k}, extra||{});
+    R.lifecycle.rule[k] = {
+      group: win.eval('DEFECT_STATUS_DEFS')[k].group,
+      bare: win.isUnresolvedBlocker(mk()),
+      withDecision: win.isUnresolvedBlocker(mk({decision:{by:'Pat',reason:'Because'}})),
+      withConfirmation: win.isUnresolvedBlocker(mk({confirmation:{by:'Sam'}})),
+      closedByDecision: win.isBlockerClosedByDecision(mk({decision:{by:'Pat',reason:'Because'}})),
+      awaitingConfirmation: win.isBlockerAwaitingConfirmation(mk())
+    };
+  }
+  R.lifecycle.legacy = {noStatus: win.isUnresolvedBlocker({classification:'blocker'}), unknownStatus: win.isUnresolvedBlocker({classification:'blocker', status:'zzz'}), nonBlocker: win.isUnresolvedBlocker({classification:'known', status:'open'})};
+  const life = {id:'life', classification:'blocker', status:'open', statusHistory:[]};
+  const steps = [['fix_identified',{by:'Dana',role:'Engineering lead',ref:'PROJ-1'}],['fix_in_progress',{by:'Dana',date:'2026-11-01'}],['fixed_unverified',{by:'Dana',role:'Engineering lead',ref:'PR-42'}],
+    ['resolved_confirmed',{by:'Ravi',role:'Release Manager',env:'UAT',ref:'Test run 7'}],['reopened',{by:'Ravi',note:'Seen again'}],['accepted',{by:'Mira',role:'Product owner',note:'Rare; workaround documented',workaround:'Retry',date:'2026-12-01'}]];
+  R.lifecycle.life = steps.map(([to,f],i)=>{ const r = win.applyDefectStatusChange(life, to, f, '2026-10-0'+(i+1)+'T10:00:00Z'); return {to, ok:r.ok, unresolved:win.isUnresolvedBlocker(life), line:win.defectStatusLine(life)}; });
+  R.lifecycle.refusals = [['accepted',{by:'P'}],['reopened',{by:'A',note:'x'}],['fix_identified',{}],['accepted',{by:'P',role:'R',note:'n',date:'31/12/2026'}]].map(([to,f])=>win.validateDefectStatusChange({classification:'blocker',status:'open'}, to, f));
+  const mkDef = (o)=>Object.assign({id:'d'+Math.random(), releaseId:'REL-T', classification:'blocker', severity:'critical', title:'x'}, o);
+  const relX = {id:'REL-T', gates:[{id:'dev-complete', status:'passed', signedBy:'A'}], envPath:['DEV'], environments:{DEV:{health:'healthy'}}};
+  const defectSets = {
+    none: [], oneOpen: [mkDef({})], oneReportedFixed: [mkDef({status:'fixed_unverified'})],
+    oneConfirmed: [mkDef({status:'resolved_confirmed', confirmation:{by:'Sam'}})], oneConfirmedNoName: [mkDef({status:'resolved_confirmed'})],
+    oneAccepted: [mkDef({status:'accepted', decision:{by:'Mira', reason:'ok'}})], oneAcceptedNoName: [mkDef({status:'accepted'})],
+    mixed: [mkDef({}), mkDef({status:'fix_in_progress'}), mkDef({status:'resolved_confirmed', confirmation:{by:'Sam'}}), mkDef({status:'deferred', decision:{by:'Pat', reason:'R2'}})]
+  };
+  R.lifecycle.readiness = {}; R.lifecycle.gateHints = {};
+  for(const [name, defs] of Object.entries(defectSets)){
+    win.eval('STATE.defects = ' + JSON.stringify(defs));
+    const out = win.calculateReadiness(relX);
+    R.lifecycle.readiness[name] = {score: out.score, defects: out.defects};
+    R.lifecycle.gateHints[name] = win.getGateReadinessHint({id:'REL-T', deliveryModels:[], environments:{}}, {id:'gng', checklist:{entry:[], exit:[]}});
   }
   win.eval('STATE.defects = ' + savedDefects);
 

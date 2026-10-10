@@ -55,6 +55,8 @@ function declaration(src, name) {
   if (starts.length !== 1) throw new Error('declaration "' + name + '" found ' + starts.length + ' times in the tool (expected exactly 1)');
   const s = starts[0];
   const fn = isFn(lines[s]);
+  // a function written on ONE line (balanced braces, ends with a closing brace) is complete as it stands
+  if (fn) { const one = lines[s]; if (/}s*$/.test(one) && one.split('{').length === one.split('}').length) return one; }
   for (let j = s; j < lines.length; j++) {
     const l = lines[j];
     if (fn ? l === '}' : /^[\]}];?$/.test(l) || (j === s && /;\s*$/.test(l))) return lines.slice(s, j + 1).join('\n');
@@ -90,12 +92,14 @@ function makeContext(opts) {
   const dom = makeDom();
   const ctx = vm.createContext({ console, document: dom.document });
   const src = toolSource();
-  const names = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES'].concat(opts.omitGateDefs ? [] : ['GATE_DEFS']);
-  const fns = ['escHtml', 'stripNegatedTerms', 'matchedTextOf', 'matchedNote', 'runReleaseAI', 'runDefectAI', 'getGateReadinessHint', 'calculateReadiness'];
+  const names = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES', 'DEFECT_STATUS_DEFS', 'DEFECT_STATUS_FIELDS'].concat(opts.omitGateDefs ? [] : ['GATE_DEFS']);
+  const fns = ['escHtml', 'stripNegatedTerms', 'matchedTextOf', 'matchedNote', 'runReleaseAI', 'runDefectAI', 'getGateReadinessHint', 'calculateReadiness',
+    '_filled', 'defectStatusKey', 'defectHasDecision', 'defectHasConfirmation', 'isUnresolvedBlocker', 'isBlockerClosedByDecision', 'isBlockerAwaitingConfirmation', 'isAcceptedReviewOverdue',
+    'validateDefectStatusChange', 'applyDefectStatusChange', 'defectStatusDetail', 'defectStatusLine'];
   const parts = ['const STATE = { selectedDMs: [], defects: [] };', 'let _lastReleaseAIRule = null;']
     .concat(names.map((n) => declaration(src, n))).concat(fns.map((n) => declaration(src, n)));
   parts.push('var __bridge = { STATE: STATE, last: function () { return _lastReleaseAIRule; }, runReleaseAI: runReleaseAI, runDefectAI: runDefectAI, ' +
-    'calculateReadiness: calculateReadiness, getGateReadinessHint: getGateReadinessHint, matchedNote: matchedNote, tables: { RELEASE_AI_RULES: RELEASE_AI_RULES, DEFECT_AI_RULES: DEFECT_AI_RULES' +
+    'calculateReadiness: calculateReadiness, getGateReadinessHint: getGateReadinessHint, matchedNote: matchedNote, lifecycle: { DEFECT_STATUS_DEFS: DEFECT_STATUS_DEFS, DEFECT_STATUS_FIELDS: DEFECT_STATUS_FIELDS, defectStatusKey: defectStatusKey, isUnresolvedBlocker: isUnresolvedBlocker, isBlockerClosedByDecision: isBlockerClosedByDecision, isBlockerAwaitingConfirmation: isBlockerAwaitingConfirmation, isAcceptedReviewOverdue: isAcceptedReviewOverdue, validateDefectStatusChange: validateDefectStatusChange, applyDefectStatusChange: applyDefectStatusChange, defectStatusDetail: defectStatusDetail, defectStatusLine: defectStatusLine }, tables: { RELEASE_AI_RULES: RELEASE_AI_RULES, DEFECT_AI_RULES: DEFECT_AI_RULES' +
     (opts.omitGateDefs ? '' : ', GATE_DEFS: GATE_DEFS') + ' } };');
   vm.runInContext(parts.join('\n'), ctx, { filename: 'tool-real-source' });
   if (opts.freezeTables !== false) Object.keys(ctx.__bridge.tables).forEach((k) => freezeDeep(ctx.__bridge.tables[k]));
@@ -238,6 +242,7 @@ function runAll() {
 
   // ------------------------------------------------------------------------------------------ D. readiness parity
   log('D. readiness == calculateReadiness()');
+  const STATUS_KEYS = Object.keys(b.lifecycle.DEFECT_STATUS_DEFS);   // (an UNKNOWN status is rejected by the input schema in the export; the tool treats it as Open - tested in the lifecycle test)
   function mkReadiness(r) {
     const nGates = 1 + Math.floor(r() * 8);
     const gates = Array.from({ length: nGates }, (_, i) => ({ id: GATE_IDS[i % 8], status: pick(r, GATE_STATUS), signedBy: r() < 0.5 ? 'Someone' : '' }));
@@ -245,12 +250,22 @@ function runAll() {
     const envPath = ENV_ALL.filter(() => true).sort(() => r() - 0.5).slice(0, nPath);
     const environments = envPath.filter(() => r() < 0.8).map((e) => ({ env: e, health: pick(r, HEALTH) }));
     const nDef = Math.floor(r() * 6);
-    const defects = Array.from({ length: nDef }, (_, i) => ({ releaseId: 'REL-T', classification: pick(r, ['blocker', 'blocker', 'deferred', 'known', 'wontfix']) }));
+    const defects = Array.from({ length: nDef }, (_, i) => {
+      const d = { releaseId: 'REL-T', classification: pick(r, ['blocker', 'blocker', 'deferred', 'known', 'wontfix']) };
+      if (r() < 0.6) { d.status = pick(r, STATUS_KEYS); d.decisionRecorded = r() < 0.5; d.confirmationRecorded = r() < 0.5; }   // R-1: lifecycle fields (absent = legacy defect)
+      return d;
+    });
     return { gates, defects, envPath, environments };
   }
   function realReadiness(inp) {
     const noise = [{ id: 'n1', releaseId: 'OTHER', classification: 'blocker' }, { id: 'n2', releaseId: 'OTHER', classification: 'blocker' }];
-    b.STATE.defects = inp.defects.map((d, i) => ({ id: 'd' + i, releaseId: d.releaseId, classification: d.classification })).concat(noise);
+    b.STATE.defects = inp.defects.map((d, i) => {
+      const o = { id: 'd' + i, releaseId: d.releaseId, classification: d.classification };
+      if (d.status !== undefined) o.status = d.status;
+      if (d.decisionRecorded) o.decision = { by: 'Pat Approver', reason: 'Accepted for this release' };
+      if (d.confirmationRecorded) o.confirmation = { by: 'Sam Tester' };
+      return o;
+    }).concat(noise);
     const envObj = {}; inp.environments.forEach((e) => { if (!(e.env in envObj)) envObj[e.env] = { health: e.health }; });
     const out = b.calculateReadiness({ id: 'REL-T', gates: inp.gates.map((g) => ({ id: g.id, status: g.status, signedBy: g.signedBy })), envPath: inp.envPath, environments: envObj });
     b.STATE.defects = [];

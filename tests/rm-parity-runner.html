@@ -112,12 +112,13 @@ async function runAll(win, doc){
     const gates=Array.from({length:1+Math.floor(r()*8)},(_,i)=>({id:GATE_IDS[i%8],status:pick(r,GATE_STATUS),signedBy:r()<0.5?'Someone':''}));
     const envPath=ENV_ALL.slice().sort(()=>r()-0.5).slice(0,1+Math.floor(r()*5));
     const environments=envPath.filter(()=>r()<0.8).map(e=>({env:e,health:pick(r,HEALTH)}));
-    const defects=Array.from({length:Math.floor(r()*6)},()=>({releaseId:'REL-T',classification:pick(r,['blocker','blocker','deferred','known','wontfix'])}));
+    const STATUS_KEYS=Object.keys(win.eval('DEFECT_STATUS_DEFS'));
+    const defects=Array.from({length:Math.floor(r()*6)},()=>{ const d={releaseId:'REL-T',classification:pick(r,['blocker','blocker','deferred','known','wontfix'])}; if(r()<0.6){ d.status=pick(r,STATUS_KEYS); d.decisionRecorded=r()<0.5; d.confirmationRecorded=r()<0.5; } return d; });   // R-1 lifecycle fields
     return {gates,defects,envPath,environments};
   }
   for(let k=0;k<400;k++){
     const inp=mkRd(); nRd++;
-    win.eval('STATE.defects = '+J(inp.defects.map((d,i)=>({id:'d'+i,releaseId:d.releaseId,classification:d.classification})).concat([{id:'n',releaseId:'OTHER',classification:'blocker'}])));
+    win.eval('STATE.defects = '+J(inp.defects.map((d,i)=>{ const o={id:'d'+i,releaseId:d.releaseId,classification:d.classification}; if(d.status!==undefined) o.status=d.status; if(d.decisionRecorded) o.decision={by:'Pat Approver',reason:'Accepted'}; if(d.confirmationRecorded) o.confirmation={by:'Sam Tester'}; return o; }).concat([{id:'n',releaseId:'OTHER',classification:'blocker'}])));
     const envObj={}; inp.environments.forEach(e=>{ if(!(e.env in envObj)) envObj[e.env]={health:e.health}; });
     const real=win.calculateReadiness({id:'REL-T',gates:inp.gates,envPath:inp.envPath,environments:envObj});
     const env=E.run('readiness',inp);
