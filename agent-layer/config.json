@@ -1,0 +1,5 @@
+{
+ "tool": "rm",
+ "html": "../rm-tool-v1.html",
+ "paymentLabel": "Payment-related terms detected. If this release changes ICT systems of an in-scope EU financial entity, DORA Article 9(4)(e) (ICT change management: changes recorded, tested, assessed, approved, implemented and verified) applies, alongside your own CAB and PCI-DSS controls. Flagged for human review - the tool has not classified this release."
+}
