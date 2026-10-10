@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RM Engine Parity Runner (real browser)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:system-ui,sans-serif;margin:16px;max-width:900px;line-height:1.5}
+  #status{padding:8px 12px;border-radius:6px;background:#eee;font-weight:600}
+  .ok{background:#d1fae5!important}.bad{background:#fee2e2!important}
+  pre{background:#f6f6f6;padding:10px;overflow:auto;max-height:420px;font-size:12px}
+  iframe{width:1px;height:1px;border:0;position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<h1>RM Engine Parity Runner</h1>
+<p>Phase E. In a <strong>real browser, with the real DOM</strong>, drives the tool's real engines (<code>runReleaseAI</code>, <code>runDefectAI</code>,
+<code>calculateReadiness</code>, <code>getGateReadinessHint</code> and the risk-register handlers) and compares them with the embedded, read-only
+<code>AgentEngine</code> exports on the same inputs. Serve the repo root over HTTP and open this page. The Node suite
+(<code>agent-layer/tests/parity_run.js</code>) runs the larger corpus; this page proves the same thing against the real DOM, including the risk bands
+whose logic lives inside DOM handlers. Result object: <code>window.__PARITY__</code>.</p>
+<div id="status">Loading tool…</div>
+<pre id="out"></pre>
+<iframe id="tool"></iframe>
+<script>
+let pass = 0; const failures = [];
+function ok(c, m){ if(c) pass++; else failures.push(m); }
+const J = (v) => JSON.stringify(v);
+function rng(seed){ let a = seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+const pick = (r,a)=>a[Math.floor(r()*a.length)];
+function tokenSamples(tok){
+  const base = tok.replace(/\\\//g,'/').replace(/\\(.)/g,'$1'); const v = new Set();
+  if(base.includes('.?')){ v.add(base.replace(/\.\?/g,'')); v.add(base.replace(/\.\?/g,' ')); }
+  else if(base.includes('.')){ v.add(base.replace(/\./g,' ')); } else v.add(base);
+  return [...v];
+}
+const ruleTokens = (rules)=> rules.map(r=> r.pattern.source.split('|').map(tokenSamples).reduce((a,b)=>a.concat(b),[]));
+const ENV_ALL=['DEV','SIT','UAT','PRE-PROD','PROD'], GATE_IDS=['dev-complete','code-review','sit','uat','preprod','gng','deploy','hypercare'];
+const GATE_STATUS=['not-started','pending','in-progress','passed','failed','waived'], HEALTH=['unknown','healthy','warning','blocked'];
+const DM_ALL=['cloud','api','mobile','desktop','legacy','di2','cwa','pilot'];
+const FILLER=['the','update','for','service','release','fix','a','tidy','quarterly','new','of','to','v2','team','housekeeping','config'];
+const norm = (s)=> s.replace(/\s+/g,' ').trim();
+// innerHTML is re-serialised by the browser (for example '>' becomes '&gt;'), so compare through the same round-trip
+const htmlNorm = (s)=>{ const d=document.createElement('div'); d.innerHTML=s; return d.innerHTML; };
+
+async function runAll(win, doc){
+  const E = win.AgentEngine;
+  ok(!!E && E.ready().ok, 'AgentEngine is embedded and its tables are present: ' + (E ? J(E.ready()) : 'missing'));
+  const relRules = win.eval('RELEASE_AI_RULES'), defRules = win.eval('DEFECT_AI_RULES');
+  const relTok = ruleTokens(relRules), defTok = ruleTokens(defRules);
+  const r = rng(424242);
+  let nRel=0, nDef=0, nRd=0, nGate=0, nRisk=0;
+
+  // ---- release_hint vs runReleaseAI() (real DOM)
+  const relCases = [];
+  relTok.forEach(toks=>toks.forEach(t=>{ [t,t.toUpperCase(),'x '+t+' y','pre'+t+'post'].forEach(s=>relCases.push({name:s,notes:''})); relCases.push({name:'Release',notes:s0(t)}); }));
+  function s0(t){ return 'notes '+t; }
+  for(let i=0;i<relTok.length;i++) for(let j=0;j<relTok.length;j++) relCases.push({name:pick(r,relTok[i])+' '+pick(r,relTok[j]),notes:''});
+  for(let n=0;n<=8;n++){ const dms=DM_ALL.slice(0,n); relCases.push({name:'Quarterly housekeeping',notes:'',dms},{name:'Payment platform release',notes:'',dms}); }
+  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*6); for(let q=0;q<len;q++) w.push(r()<0.35?pick(r,pick(r,relTok)):pick(r,FILLER)); relCases.push({name:w.slice(0,Math.ceil(len/2)).join(' '),notes:w.slice(Math.ceil(len/2)).join(' '),dms:r()<0.3?DM_ALL.filter(()=>r()<0.45):[]}); }
+  for(const f of relCases){
+    nRel++;
+    doc.getElementById('rel-name').value=f.name; doc.getElementById('rel-notes').value=f.notes;
+    win.eval('STATE.selectedDMs = '+J(f.dms||[]));
+    const box=doc.getElementById('rel-ai-hint'); box.className='ai-hint'; doc.getElementById('rel-ai-hint-text').innerHTML='';
+    win.runReleaseAI();
+    const shown=box.classList.contains('show'), cls=norm(box.className), html=doc.getElementById('rel-ai-hint-text').innerHTML;
+    if(!f.name){ continue; }  // agent path refuses an empty name (policy); legacy engine scans notes only
+    const env=E.run('release_hint',{name:f.name,notes:f.notes,deliveryModels:f.dms||[]});
+    if(env.status!=='computed'){ ok(false,'release not computed '+J(f)+' '+J(env)); continue; }
+    ok(shown===env.output.matched, 'release matched-state '+J(f));
+    if(shown && env.output.matched){
+      const lvl=env.output.level==='danger'?'danger':env.output.level==='warn'?'warn':'';
+      ok(cls===norm('ai-hint '+lvl+' show'),'release class '+J(f)+' '+cls);
+      ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html),'release html '+J(f));
+    }
+  }
+  win.eval('STATE.selectedDMs = []');
+
+  // ---- defect_hint vs runDefectAI() (real DOM; the legacy code WRITES severity/classification)
+  win.populateSevDropdown();
+  const defCases=[];
+  defTok.forEach(toks=>toks.forEach(t=>['Crash '+t,t+' in the module','Issue: '+t.toUpperCase(),'xx'+t+'yy extra'].forEach(s=>defCases.push(s))));
+  for(let i=0;i<defTok.length;i++) for(let j=0;j<defTok.length;j++) defCases.push(pick(r,defTok[i])+' and '+pick(r,defTok[j]));
+  for(let n=0;n<=10;n++){ defCases.push('a'.repeat(n)); defCases.push(' '.repeat(n)+'crash'); }
+  ['Application crash on startup','Download button misaligned','crash!!','Typo in footer label','Something unrelated happens here'].forEach(s=>defCases.push(s));
+  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*6); for(let q=0;q<len;q++) w.push(r()<0.35?pick(r,pick(r,defTok)):pick(r,FILLER)); defCases.push(w.join(' ')); }
+  const sevOpts = [...doc.getElementById('def-sev').options].map(o=>o.value), clsOpts=[...doc.getElementById('def-class').options].map(o=>o.value);
+  const sevS = sevOpts.includes('low')?'low':sevOpts[0], clsS = clsOpts.includes('known')?'known':clsOpts[0];
+  for(const title of defCases){
+    nDef++;
+    doc.getElementById('def-title').value=title; doc.getElementById('def-sev').value=sevS; doc.getElementById('def-class').value=clsS;
+    const box=doc.getElementById('def-ai-hint'); box.className='ai-hint'; doc.getElementById('def-ai-hint-text').innerHTML='';
+    win.runDefectAI();
+    const shown=box.classList.contains('show'), html=doc.getElementById('def-ai-hint-text').innerHTML, sev=doc.getElementById('def-sev').value, kls=doc.getElementById('def-class').value;
+    const env=E.run('defect_hint',{title});
+    if(title.trim().length<8){ ok(!shown && env.status==='not_assessed' && sev===sevS && kls===clsS,'defect short '+J(title)); continue; }
+    if(!shown){ ok(env.status==='computed' && !env.output.matched && sev===sevS && kls===clsS,'defect nomatch '+J(title)); continue; }
+    ok(env.status==='computed' && env.output.matched && sev===env.output.suggested_severity && kls===env.output.suggested_classification,'defect suggestion '+J(title)+' real='+sev+'/'+kls);
+    ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html),'defect html '+J(title));
+  }
+
+  // ---- readiness vs calculateReadiness()
+  const savedDefects = win.eval('JSON.stringify(STATE.defects)');
+  function mkRd(){
+    const gates=Array.from({length:1+Math.floor(r()*8)},(_,i)=>({id:GATE_IDS[i%8],status:pick(r,GATE_STATUS),signedBy:r()<0.5?'Someone':''}));
+    const envPath=ENV_ALL.slice().sort(()=>r()-0.5).slice(0,1+Math.floor(r()*5));
+    const environments=envPath.filter(()=>r()<0.8).map(e=>({env:e,health:pick(r,HEALTH)}));
+    const defects=Array.from({length:Math.floor(r()*6)},()=>({releaseId:'REL-T',classification:pick(r,['blocker','blocker','deferred','known','wontfix'])}));
+    return {gates,defects,envPath,environments};
+  }
+  for(let k=0;k<400;k++){
+    const inp=mkRd(); nRd++;
+    win.eval('STATE.defects = '+J(inp.defects.map((d,i)=>({id:'d'+i,releaseId:d.releaseId,classification:d.classification})).concat([{id:'n',releaseId:'OTHER',classification:'blocker'}])));
+    const envObj={}; inp.environments.forEach(e=>{ if(!(e.env in envObj)) envObj[e.env]={health:e.health}; });
+    const real=win.calculateReadiness({id:'REL-T',gates:inp.gates,envPath:inp.envPath,environments:envObj});
+    const env=E.run('readiness',inp);
+    ok(env.status==='computed' && ['score','gates','defects','envs','signoffs'].every(k2=>env.output[k2]===real[k2]),'readiness '+J(real)+' vs '+J(env));
+  }
+  // legacy artefacts exist in the real engine; the export refuses them
+  win.eval('STATE.defects = []');
+  const nan = win.calculateReadiness({id:'REL-T',gates:[{id:'sit',status:'passed',signedBy:'S'}],envPath:[],environments:{}});
+  ok(Number.isNaN(nan.envs),'real engine: empty environment path still yields NaN (characterised)');
+  ok(E.run('readiness',{gates:[{id:'sit',status:'passed',signedBy:'S'}],defects:[],envPath:[],environments:[]}).status!=='computed','export refuses the empty-path artefact');
+  win.eval('STATE.defects = '+savedDefects);
+
+  // ---- gate_hint vs getGateReadinessHint()
+  const defs = win.eval('GATE_DEFS');
+  function gateCase(inp){
+    nGate++;
+    win.eval('STATE.defects = '+J(Array.from({length:inp.blockerCount},(_,i)=>({id:'b'+i,releaseId:'REL-G',classification:'blocker'})).concat([{id:'x',releaseId:'OTHER',classification:'blocker'}])));
+    const rel={id:'REL-G',environments:{'PRE-PROD':{version:inp.preProdVersion},'PROD':{version:inp.prodVersion}},deliveryModels:inp.deliveryModels};
+    const gate={id:inp.gateId,checklist:{entry:new Array(inp.entryConfirmed).fill('c'),exit:new Array(inp.exitConfirmed).fill('c')}};
+    const real=win.getGateReadinessHint(rel,gate);
+    const env=E.run('gate_hint',inp);
+    const hs=env.status==='computed'?env.output.hints:null;
+    const exp=hs&&hs.length?'<div class="ai-hint show" style="margin-top:10px;"><div class="ai-hint-label">⬡ Intelligence — Gate Readiness</div>'+hs.map(h=>h.text_html).join('<br>')+'</div>':'';
+    ok(hs!==null && real===exp,'gate hint '+J(inp));  // string returned directly (never passes through innerHTML)
+  }
+  GATE_IDS.forEach(gateId=>{ const et=(defs[gateId].entryCriteria||[]).length, xt=(defs[gateId].exitCriteria||[]).length;
+    [0,et-1,et,et+1].forEach(ec=>[0,xt,xt+2].forEach(xc=>[0,2].forEach(bc=>[['',''],['2.0.0','1.9.0'],['1.0.0','1.0.0']].forEach(pv=>[[],['mobile']].forEach(dm=>{
+      if(ec>=0&&xc>=0) gateCase({gateId,entryConfirmed:ec,exitConfirmed:xc,blockerCount:bc,preProdVersion:pv[0],prodVersion:pv[1],deliveryModels:dm});
+    }))))); });
+  win.eval('STATE.defects = '+savedDefects);
+
+  // ---- risk_score vs the real risk-register handlers (savePlannerRisk computes L x I; renderPlannerRisks derives the band)
+  win.eval('window._pendingRisks = []');
+  for(let l=1;l<=5;l++) for(let i=1;i<=5;i++){
+    nRisk++;
+    win.eval('window._pendingRisks = []');
+    doc.getElementById('risk-desc').value='parity '+l+'x'+i;
+    doc.getElementById('risk-likelihood').selectedIndex=l-1; doc.getElementById('risk-impact').selectedIndex=i-1;
+    win.savePlannerRisk();
+    const saved=win.eval('window._pendingRisks[0]');
+    const row=doc.querySelector('#risk-register-list .risk-row');
+    const realBand=row?(['high','medium','low'].find(b=>row.classList.contains('risk-'+b))):null;
+    const env=E.run('risk_score',{likelihood:l,impact:i});
+    ok(saved && saved.likelihood===l && saved.impact===i && saved.score===env.output.score && realBand===env.output.band,'risk '+l+'x'+i+' real='+(saved&&saved.score)+'/'+realBand+' export='+J(env));
+  }
+  win.eval('window._pendingRisks = []'); win.renderPlannerRisks();
+  return {nRel,nDef,nRd,nGate,nRisk};
+}
+
+async function main(){
+  const status=document.getElementById('status'), out=document.getElementById('out'), frame=document.getElementById('tool');
+  const fresh = await (await fetch('../rm-tool-v1.html',{cache:'no-store'})).text();
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(fresh));
+  const sha = Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,12);
+  const loaded = new Promise(r=>frame.addEventListener('load',r,{once:true}));
+  frame.src='../rm-tool-v1.html?cb='+Date.now(); await loaded;
+  await new Promise(r=>setTimeout(r,800));
+  try{
+    const counts = await runAll(frame.contentWindow, frame.contentDocument);
+    window.__PARITY__ = {pass, failed: failures.length, failures: failures.slice(0,30), counts, toolSha: sha};
+    status.className = failures.length?'bad':'ok';
+    status.textContent = (failures.length? 'PARITY FAILED: '+failures.length+' difference(s)' : 'PARITY PASS: '+pass+' assertions')+'  [tool sha256:'+sha+']  '+J(counts);
+    out.textContent = failures.length? failures.slice(0,30).join('\n') : '';
+  }catch(err){ status.className='bad'; status.textContent='Runner error: '+err.message; out.textContent=err.stack; window.__PARITY__={error:err.message}; }
+}
+main();
+</script>
+</body>
+</html>
