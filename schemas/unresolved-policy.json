@@ -78,7 +78,7 @@
      "block_status": "cannot_be_determined",
      "agent_writable": "yes",
      "on_invalid": "block_as_missing",
-     "rationale": "Legacy engine returns 50/100 for a release with zero gates (defects+environments still score) and 0/0 sign-offs - an artefact, not a verdict. The agent path refuses to produce it."
+     "rationale": "With zero gates the old engine returned 50/100 (an artefact). Since Q-7 (2026-10-10) the tool itself reports 'not assessed'; the agent path refuses to produce a score as well."
     },
     "defects": {
      "on_unresolved": "block",
@@ -110,7 +110,7 @@
      "block_status": "cannot_be_determined",
      "agent_writable": "yes",
      "on_invalid": "block_as_missing",
-     "rationale": "Legacy engine divides by envPath.length: an empty path yields NaN. The agent path refuses to produce it."
+     "rationale": "With an empty path the old engine divided by zero and returned NaN. Since Q-8 (2026-10-10) the tool itself reports 'not assessed'; the agent path refuses to produce a score as well."
     },
     "environments": {
      "on_unresolved": "fallback",

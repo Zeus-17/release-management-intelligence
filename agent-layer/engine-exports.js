@@ -23,10 +23,8 @@
  *   A computed result is verbatim engine output; this module never rewords engine text and never invents a verdict.
  *   `decision_record` (the human GO / NO-GO) is deliberately NOT exportable: it is a recorded human decision, not a computation.
  *
- * KNOWN LEGACY QUIRKS (deliberately NOT reproduced as answers - the unresolved-input policy refuses them instead):
- *   - readiness with zero gates would score 50/100 on the other components; an empty environment path divides by zero (NaN).
- *     run() returns cannot_be_determined for both. The raw legacy arithmetic is available ONLY via _test.legacyReadiness()
- *     so the parity test can prove the mirror is faithful.
+ * DEGENERATE READINESS CASES: a release with zero gates or an empty environment path used to score 50/100 or NaN. Since the Q-7/Q-8 engine
+ *   change the tool reports "not assessed"; run() returns cannot_be_determined for both (same meaning, the unresolved-input policy agrees).
  *
  * INERT UNTIL USED. No listeners, timers, storage or network. Never throws for bad input (returns a status instead).
  */
@@ -40,21 +38,23 @@
   var VERSION = 'ee-1.0-rm';
   var TOOL = 'rm';
 
-  /** The tool's own tables, referenced BY NAME in the global scope at call time (never copied). */
-  var REQUIRED = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES', 'GATE_DEFS'];
+  /** The tool's own tables and PURE helper functions, referenced BY NAME in the global scope at call time (never copied). */
+  var REQUIRED = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES', 'GATE_DEFS', 'stripNegatedTerms', 'matchedTextOf'];
 
   function table(name) {
     switch (name) {
       case 'RELEASE_AI_RULES': return typeof RELEASE_AI_RULES !== 'undefined' ? RELEASE_AI_RULES : null; // eslint-disable-line no-undef
       case 'DEFECT_AI_RULES': return typeof DEFECT_AI_RULES !== 'undefined' ? DEFECT_AI_RULES : null;    // eslint-disable-line no-undef
       case 'GATE_DEFS': return typeof GATE_DEFS !== 'undefined' ? GATE_DEFS : null;                      // eslint-disable-line no-undef
+      case 'stripNegatedTerms': return typeof stripNegatedTerms === 'function' ? stripNegatedTerms : null; // eslint-disable-line no-undef
+      case 'matchedTextOf': return typeof matchedTextOf === 'function' ? matchedTextOf : null;            // eslint-disable-line no-undef
       default: return null;
     }
   }
 
   /** Are all the tool tables this module depends on present? Fail closed if the tool changed shape. */
   function ready() {
-    var missing = REQUIRED.filter(function (n) { var t = table(n); return !t || typeof t !== 'object'; });
+    var missing = REQUIRED.filter(function (n) { var t = table(n); return !t || (typeof t !== 'object' && typeof t !== 'function'); });
     return { ok: missing.length === 0, missing: missing };
   }
 
@@ -102,9 +102,13 @@
     if (dms.length >= 4) {
       return computed('release_hint', { matched: true, rule: 'dm_complexity', level: 'warn', hint_html: dmComplexityHtml(dms.length), complete: complete }, caveats);
     }
+    var scan = table('stripNegatedTerms')(text);        // Q-3: negated keywords ("non-urgent") are ignored - the tool's own pure helper
     for (var i = 0; i < rules.length; i++) {
-      if (rules[i].pattern.test(text)) {
-        return computed('release_hint', { matched: true, rule: 'release_rule_' + i, level: rules[i].level, hint_html: rules[i].hint, complete: complete }, caveats);
+      if (rules[i].pattern.test(scan)) {
+        var out = { matched: true, rule: 'release_rule_' + i, level: rules[i].level, hint_html: rules[i].hint, complete: complete };
+        var mt = table('matchedTextOf')(rules[i], scan);  // Q-5: the words that triggered it
+        if (mt) out.matched_text = mt;
+        return computed('release_hint', out, caveats);
       }
     }
     return computed('release_hint', { matched: false, complete: complete }, caveats);
@@ -122,6 +126,8 @@
     for (var i = 0; i < rules.length; i++) {
       if (rules[i].pattern.test(title)) {
         var o = { matched: true, rule: 'defect_rule_' + i, hint_html: rules[i].hint };
+        var mtd = table('matchedTextOf')(rules[i], title);
+        if (mtd) o.matched_text = mtd;
         if (rules[i].sev) o.suggested_severity = rules[i].sev;
         if (rules[i].cls) o.suggested_classification = rules[i].cls;
         return computed('defect_hint', o, caveats);
@@ -134,7 +140,7 @@
    * Mirrors calculateReadiness(): gates 40% / defects 30% / environments 20% / sign-offs 10%, each rounded, then the weighted
    * sum rounded. There is NO Go/No-Go threshold in this engine (colour bands 75/50 are display only). */
 
-  /** The legacy arithmetic exactly, including its two artefacts (zero gates -> divisor 1; empty path -> NaN). Test hook only. */
+  /** The tool's readiness arithmetic for a release that HAS gates and environments (the two degenerate cases are 'not assessed' in the tool since Q-7/Q-8). */
   function legacyReadiness(input) {
     var gates = input.gates || [];
     var gatesTotal = gates.length || 1;
@@ -202,7 +208,7 @@
   /* ---------------------------------------------------------------------------------------------- public API */
 
   var IMPL = { release_hint: releaseHint, defect_hint: defectHint, readiness: readiness, gate_hint: gateHint, risk_score: riskScore };
-  var DEPENDS = { release_hint: ['RELEASE_AI_RULES'], defect_hint: ['DEFECT_AI_RULES'], gate_hint: ['GATE_DEFS'], readiness: [], risk_score: [] };
+  var DEPENDS = { release_hint: ['RELEASE_AI_RULES', 'stripNegatedTerms', 'matchedTextOf'], defect_hint: ['DEFECT_AI_RULES', 'matchedTextOf'], gate_hint: ['GATE_DEFS'], readiness: [], risk_score: [] };
 
   /**
    * Run engine `engine` on an already-resolved, schema-valid engine input. `caveats` are those produced by the unresolved-input

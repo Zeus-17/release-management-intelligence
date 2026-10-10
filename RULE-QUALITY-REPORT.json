@@ -1,552 +1,1470 @@
 {
  "release_hint": [
   {
+   "t": "Payment gateway upgrade",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Checkout page redesign",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Billing engine migration",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Invoice generation fix",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Card transaction retry logic",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
    "t": "Stripe webhook listener update",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "PayPal button integration",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
+  },
+  {
+   "t": "Open Banking connector release",
+   "expected": 0,
+   "before": 0,
+   "now": 0
   },
   {
    "t": "BACS file export change",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Apple Pay support",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "SEPA direct debit mandate update",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
+  },
+  {
+   "t": "FX rate service v2",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Trading platform order routing",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Settlement batch job tuning",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "PCI DSS scope reduction",
+   "expected": 0,
+   "before": 0,
+   "now": 0
   },
   {
    "t": "Refund processing flow",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Payout schedule change for merchants",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Direct debit collection run",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Wire transfer limits update",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Update PFX certificate on web tier",
    "expected": null,
-   "current": 0,
-   "A": null,
-   "B": null
+   "before": 0,
+   "now": null
+  },
+  {
+   "t": "Download page copy changes",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Quarterly housekeeping",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Static asset refresh",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Typo fixes in footer",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Refine search ranking",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Finance team intranet page text update",
+   "expected": null,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Trading card game promo banner",
+   "expected": null,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "SSO login rework",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Password reset flow change",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "OAuth2 provider switch",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "SAML federation with partner",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "MFA enrolment screen",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "2FA via authenticator app",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "LDAP directory sync fix",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Active Directory group mapping",
+   "expected": 1,
+   "before": 1,
+   "now": 1
   },
   {
    "t": "Okta tenant migration",
    "expected": 1,
-   "current": 2,
-   "A": 2,
-   "B": 1
+   "before": 2,
+   "now": 1
   },
   {
    "t": "Biometric sign-in",
    "expected": 1,
-   "current": null,
-   "A": null,
-   "B": 1
+   "before": null,
+   "now": 1
   },
   {
    "t": "Single sign-on certificate renewal",
    "expected": 1,
-   "current": null,
-   "A": null,
-   "B": 1
+   "before": null,
+   "now": 1
   },
   {
    "t": "Passkey support",
    "expected": 1,
-   "current": null,
-   "A": null,
-   "B": 1
+   "before": null,
+   "now": 1
   },
   {
    "t": "Author bio page layout",
    "expected": null,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Association directory listing",
    "expected": null,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Lessons learned page update",
    "expected": null,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Authority matrix document refresh",
    "expected": null,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
+  },
+  {
+   "t": "Brand identity refresh on landing page",
+   "expected": null,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Remove old test credential from docs",
+   "expected": null,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Database schema migration",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Postgres 15 upgrade",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Add index to orders table",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "MySQL replication change",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Oracle to Postgres cutover",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "MongoDB cluster resize",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Elasticsearch reindex",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Data model change for customer",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "SQL Server patching",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "DB maintenance window",
+   "expected": 2,
+   "before": 2,
+   "now": 2
   },
   {
    "t": "Alter table orders add column",
    "expected": 2,
-   "current": null,
-   "A": null,
-   "B": 2
+   "before": null,
+   "now": 2
   },
   {
    "t": "Backfill job for legacy rows",
    "expected": 2,
-   "current": null,
-   "A": null,
-   "B": 2
+   "before": null,
+   "now": 2
   },
   {
    "t": "Index page copy update",
    "expected": null,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
   },
   {
    "t": "Elastic scaling of web tier",
    "expected": null,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
   },
   {
    "t": "Subindex tidy in the style guide",
    "expected": null,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
+  },
+  {
+   "t": "Feedback widget colour tweak",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Emergency fix for checkout",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Urgent hotfix rollout",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "P1 incident remediation",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Critical fix for login",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Sev1 patch deployment",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Severity 1 workaround release",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Hot-fix to payment queue",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Major incident remediation release",
+   "expected": 3,
+   "before": 3,
+   "now": 3
   },
   {
    "t": "Out-of-band security patch",
    "expected": 3,
-   "current": null,
-   "A": null,
-   "B": 3
+   "before": null,
+   "now": 3
   },
   {
    "t": "Step1 onboarding screens",
    "expected": null,
-   "current": 3,
-   "A": null,
-   "B": null
+   "before": 3,
+   "now": null
+  },
+  {
+   "t": "Non-urgent tidy-up of release notes",
+   "expected": null,
+   "before": 3,
+   "now": null
+  },
+  {
+   "t": "Not an emergency: routine monthly release",
+   "expected": null,
+   "before": 3,
+   "now": null
   },
   {
    "t": "Stop1 sign replacement documentation",
    "expected": null,
-   "current": 3,
-   "A": null,
-   "B": null
+   "before": 3,
+   "now": null
+  },
+  {
+   "t": "iOS app update",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Android release 5.2",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "App Store submission for v3",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Google Play staged rollout",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "TestFlight build for UAT",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Mobile onboarding flow",
+   "expected": 4,
+   "before": 4,
+   "now": 4
   },
   {
    "t": "iPhone widget",
    "expected": 4,
-   "current": null,
-   "A": null,
-   "B": 4
+   "before": null,
+   "now": 4
+  },
+  {
+   "t": "Phased rollout via app stores",
+   "expected": 4,
+   "before": 4,
+   "now": 4
   },
   {
    "t": "Scenarios documentation update",
    "expected": null,
-   "current": 4,
-   "A": null,
-   "B": null
+   "before": 4,
+   "now": null
   },
   {
    "t": "Studios booking page",
    "expected": null,
-   "current": 4,
-   "A": null,
-   "B": null
+   "before": 4,
+   "now": null
   },
   {
    "t": "Radios catalogue update",
    "expected": null,
-   "current": 4,
-   "A": null,
-   "B": null
+   "before": 4,
+   "now": null
   },
   {
    "t": "Curiosity-driven reading list",
    "expected": null,
-   "current": 4,
-   "A": null,
-   "B": null
+   "before": 4,
+   "now": null
+  },
+  {
+   "t": "GDPR consent banner update",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Personal data export",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "PII masking in logs",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Data subject access request tool",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "ICO reporting workflow",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Privacy notice rewrite",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Data protection impact assessment template",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "DPA addendum rollout",
+   "expected": 5,
+   "before": 5,
+   "now": 5
   },
   {
    "t": "Customer address book import",
    "expected": 5,
-   "current": null,
-   "A": null,
-   "B": 5
+   "before": null,
+   "now": 5
   },
   {
    "t": "Date-of-birth field added to profile",
    "expected": 5,
-   "current": null,
-   "A": null,
-   "B": 5
+   "before": null,
+   "now": 5
+  },
+  {
+   "t": "Email preference centre",
+   "expected": 5,
+   "before": null,
+   "now": null
   },
   {
    "t": "Unicode font support",
    "expected": null,
-   "current": 5,
-   "A": null,
-   "B": null
+   "before": 5,
+   "now": null
   },
   {
    "t": "Mexico office opening banner",
    "expected": null,
-   "current": 5,
-   "A": null,
-   "B": null
+   "before": 5,
+   "now": null
+  },
+  {
+   "t": "Basic table sorting",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Update panel layout for admin screen",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Supplier API integration",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Third-party SDK upgrade",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Vendor portal connector",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Partner API v2 adoption",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "SaaS CRM connector",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "External service endpoint swap",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Salesforce integration",
+   "expected": 6,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Non-vendor internal tooling clean-up",
+   "expected": null,
+   "before": 6,
+   "now": null
   },
   {
    "t": "Saaslike naming guideline for modules",
    "expected": null,
-   "current": 6,
-   "A": null,
-   "B": null
+   "before": 6,
+   "now": null
+  },
+  {
+   "t": "Canary rollout of new search",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Beta programme for new dashboard",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Pilot with 5% of users",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Feature flag for new navigation",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Dark launch of recommendations",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "A/B test of landing page",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Limited release to staff",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Alphabetical sorting of names",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Alphabet soup glossary",
+   "expected": null,
+   "before": null,
+   "now": null
   },
   {
    "t": "Previews of attachments are slow to open",
    "expected": null,
-   "current": 7,
-   "A": null,
-   "B": null
+   "before": 7,
+   "now": null
+  },
+  {
+   "t": "Decommission legacy portal",
+   "expected": 8,
+   "before": 8,
+   "now": 8
+  },
+  {
+   "t": "Deprecate v1 API",
+   "expected": 8,
+   "before": 8,
+   "now": 8
+  },
+  {
+   "t": "Sunset old reporting tool",
+   "expected": 8,
+   "before": 8,
+   "now": 8
+  },
+  {
+   "t": "End of life for Windows 2012 hosts",
+   "expected": 8,
+   "before": 8,
+   "now": 8
+  },
+  {
+   "t": "Retire legacy portal",
+   "expected": 8,
+   "before": 8,
+   "now": 8
+  },
+  {
+   "t": "Turn off the FTP service",
+   "expected": 8,
+   "before": 8,
+   "now": 8
   },
   {
    "t": "Geolocation lookup service",
    "expected": null,
-   "current": 8,
-   "A": null,
-   "B": null
+   "before": 8,
+   "now": null
   },
   {
    "t": "Remove typo from footer",
    "expected": null,
-   "current": 8,
-   "A": null,
-   "B": null
+   "before": 8,
+   "now": null
   },
   {
    "t": "Remove duplicate button",
    "expected": null,
-   "current": 8,
-   "A": null,
-   "B": null
+   "before": 8,
+   "now": null
   },
   {
    "t": "Turn off animations for reduced motion setting",
    "expected": null,
-   "current": 8,
-   "A": null,
-   "B": null
+   "before": 8,
+   "now": null
+  },
+  {
+   "t": "Removal of trailing whitespace in config",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Payment login change",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "SSO for payment platform",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Database upgrade for the mobile app backend",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "GDPR changes for supplier data exchange",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Emergency rollback of canary feature",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Retire legacy payment system",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Something unrelated",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Housekeeping",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Rename internal wiki space",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Update team page",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Refresh onboarding checklist",
+   "expected": null,
+   "before": null,
+   "now": null
   }
  ],
  "defect_hint": [
   {
+   "t": "Application crash on startup",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Null pointer exception in order service",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "NPE when saving profile",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "HTTP 500 on search results",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Fatal error loading dashboard",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Site outage in EU region",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "Service unavailable after deploy",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "API is down for all tenants",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
+   "t": "App not responding after login",
+   "expected": 0,
+   "before": 0,
+   "now": 0
+  },
+  {
    "t": "Server falls over under load",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Blank white screen on launch",
    "expected": 0,
-   "current": null,
-   "A": null,
-   "B": 0
+   "before": null,
+   "now": 0
   },
   {
    "t": "Download button misaligned",
    "expected": 5,
-   "current": 0,
-   "A": 5,
-   "B": 5
+   "before": 0,
+   "now": 5
   },
   {
    "t": "Countdown timer shows wrong colour",
    "expected": 5,
-   "current": 0,
-   "A": 5,
-   "B": 5
+   "before": 0,
+   "now": 5
   },
   {
    "t": "Markdown preview strips tables",
    "expected": null,
-   "current": 0,
-   "A": null,
-   "B": null
+   "before": 0,
+   "now": null
   },
   {
    "t": "Breakdown chart legend unclear",
    "expected": 5,
-   "current": 0,
-   "A": null,
-   "B": null
+   "before": 0,
+   "now": null
   },
   {
    "t": "Fee shown as £500 instead of £50",
    "expected": 1,
-   "current": 0,
-   "A": null,
-   "B": null
+   "before": 0,
+   "now": null
   },
   {
    "t": "Export contains 5000 rows instead of 500",
    "expected": 3,
-   "current": 0,
-   "A": null,
-   "B": null
+   "before": 0,
+   "now": null
+  },
+  {
+   "t": "Card payment declined incorrectly",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Duplicate transaction on retry",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Billing run double-charged customers",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Checkout fails for Visa",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Fraud rule blocks valid purchases",
+   "expected": 1,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Refund not issued after cancellation",
+   "expected": 1,
+   "before": 1,
+   "now": 1
   },
   {
    "t": "Wrong balance shown after transfer",
    "expected": 1,
-   "current": 1,
-   "A": null,
-   "B": 1
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Money missing from wallet",
+   "expected": 1,
+   "before": 1,
+   "now": 1
   },
   {
    "t": "Direct debit mandate not created",
    "expected": 1,
-   "current": null,
-   "A": null,
-   "B": 1
+   "before": null,
+   "now": 1
   },
   {
    "t": "Discard changes dialog text wrong",
    "expected": 5,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Scorecard colours hard to read",
    "expected": 5,
-   "current": 1,
-   "A": 5,
-   "B": 5
+   "before": 1,
+   "now": 5
   },
   {
    "t": "SFTP file transfer to partner fails",
    "expected": 0,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Fundamentals tab missing from course page",
    "expected": null,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
   },
   {
    "t": "Cardinality warning in query planner",
    "expected": 4,
-   "current": 1,
-   "A": null,
-   "B": null
+   "before": 1,
+   "now": null
+  },
+  {
+   "t": "Users cannot login after reset",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Password reset email not sent",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "SSO redirect loop",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Token expired errors on mobile",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "401 on valid credentials",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Locked out after three attempts",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Sign in button unresponsive",
+   "expected": 2,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Cannot access admin console",
+   "expected": 2,
+   "before": 2,
+   "now": 2
   },
   {
    "t": "Author name truncated in article list",
    "expected": 5,
-   "current": 2,
-   "A": null,
-   "B": 5
+   "before": 2,
+   "now": 5
   },
   {
    "t": "Lessons learned page returns 404",
    "expected": null,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
   },
   {
    "t": "Association list not sorted alphabetically",
    "expected": null,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
   },
   {
    "t": "Total shown as £401 instead of £410",
    "expected": 1,
-   "current": 2,
-   "A": null,
-   "B": null
+   "before": 2,
+   "now": null
   },
   {
    "t": "Possession field label typo on form",
    "expected": 5,
-   "current": 2,
-   "A": 5,
-   "B": 5
+   "before": 2,
+   "now": 5
+  },
+  {
+   "t": "Data loss when saving form",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Corruption of attachments on upload",
+   "expected": 3,
+   "before": 3,
+   "now": 3
   },
   {
    "t": "Records overwritten by concurrent edit",
    "expected": 3,
-   "current": null,
-   "A": 3,
-   "B": 3
+   "before": null,
+   "now": 3
+  },
+  {
+   "t": "Orders deleted after migration",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Missing record in audit export",
+   "expected": 3,
+   "before": 3,
+   "now": 3
+  },
+  {
+   "t": "Wrong data shown for another customer",
+   "expected": 3,
+   "before": 3,
+   "now": 3
   },
   {
    "t": "Duplicate rows created on import",
    "expected": 3,
-   "current": null,
-   "A": null,
-   "B": 3
+   "before": null,
+   "now": 3
+  },
+  {
+   "t": "Incorrect calculation of VAT on invoice",
+   "expected": 1,
+   "before": 3,
+   "now": 3
   },
   {
    "t": "Deleted items folder label has a typo",
    "expected": 5,
-   "current": 3,
-   "A": 5,
-   "B": 5
+   "before": 3,
+   "now": 5
   },
   {
    "t": "Overwritten placeholder text in input looks odd",
    "expected": 5,
-   "current": null,
-   "A": 3,
-   "B": 3
+   "before": null,
+   "now": 3
+  },
+  {
+   "t": "Search page is very slow",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Timeout when loading reports",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "High latency on API calls",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Memory leak in worker process",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "CPU spikes to 100 percent",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Page load takes 12 seconds",
+   "expected": 4,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Response time degraded after release",
+   "expected": 4,
+   "before": 4,
+   "now": 4
   },
   {
    "t": "Laggy scrolling on long lists",
    "expected": 4,
-   "current": null,
-   "A": null,
-   "B": 4
+   "before": null,
+   "now": 4
+  },
+  {
+   "t": "Slow motion animation preference ignored",
+   "expected": null,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Timeout setting label unclear in preferences",
+   "expected": 5,
+   "before": 4,
+   "now": 4
+  },
+  {
+   "t": "Typo in footer label",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Spelling mistake on pricing page",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Wrong colour on primary button",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Font too small in table",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Misaligned margin on card layout",
+   "expected": 5,
+   "before": 1,
+   "now": 1
+  },
+  {
+   "t": "Icon missing in toolbar",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Padding inconsistent in modal",
+   "expected": 5,
+   "before": 5,
+   "now": 5
+  },
+  {
+   "t": "Label text truncated on narrow panels",
+   "expected": 5,
+   "before": 5,
+   "now": 5
   },
   {
    "t": "Silicon supply feed fails to refresh",
    "expected": 0,
-   "current": 5,
-   "A": null,
-   "B": null
+   "before": 5,
+   "now": null
   },
   {
    "t": "Marginal gains report returns empty",
    "expected": null,
-   "current": 5,
-   "A": null,
-   "B": null
+   "before": 5,
+   "now": null
   },
   {
    "t": "Typology classifier misfires on short input",
    "expected": null,
-   "current": 5,
-   "A": null,
-   "B": null
+   "before": 5,
+   "now": null
+  },
+  {
+   "t": "Layout broken in Safari",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Android back button exits app",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Does not render on Firefox",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "iOS keyboard covers input",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Tablet layout overflows",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Not responsive below 400px",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Chrome extension blocks upload",
+   "expected": 6,
+   "before": 6,
+   "now": 6
+  },
+  {
+   "t": "Edge shows blank page",
+   "expected": 6,
+   "before": 6,
+   "now": 6
   },
   {
    "t": "Knowledge base search returns nothing",
    "expected": null,
-   "current": 6,
-   "A": null,
-   "B": null
+   "before": 6,
+   "now": null
   },
   {
    "t": "Acknowledge button does nothing on click",
    "expected": null,
-   "current": 6,
-   "A": null,
-   "B": null
+   "before": 6,
+   "now": null
   },
   {
    "t": "Scenarios page is empty",
    "expected": null,
-   "current": 6,
-   "A": null,
-   "B": null
+   "before": 6,
+   "now": null
   },
   {
    "t": "Edge case in rounding of ledger totals",
    "expected": 3,
-   "current": 6,
-   "A": null,
-   "B": null
+   "before": 6,
+   "now": null
+  },
+  {
+   "t": "XSS vulnerability in comments",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "SQL injection in search box",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "CVE-2026-1234 in dependency",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "CSRF token missing on form",
+   "expected": 7,
+   "before": 2,
+   "now": 2
+  },
+  {
+   "t": "Exposure of API key in logs",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Data breach suspected",
+   "expected": 7,
+   "before": 7,
+   "now": 7
+  },
+  {
+   "t": "Exploit published for library",
+   "expected": 7,
+   "before": 7,
+   "now": 7
   },
   {
    "t": "Hardcoded secret in repository",
    "expected": 7,
-   "current": null,
-   "A": null,
-   "B": 7
+   "before": null,
+   "now": 7
   },
   {
    "t": "Open S3 bucket with customer files",
    "expected": 7,
-   "current": null,
-   "A": null,
-   "B": 7
+   "before": null,
+   "now": 7
   },
   {
    "t": "Dependency injection container fails to start",
    "expected": 0,
-   "current": 7,
-   "A": null,
-   "B": null
+   "before": 7,
+   "now": null
   },
   {
    "t": "SLA breach alert not firing",
    "expected": null,
-   "current": 7,
-   "A": null,
-   "B": null
+   "before": 7,
+   "now": null
   },
   {
    "t": "Camera exposure slider has no effect",
    "expected": null,
-   "current": 7,
-   "A": null,
-   "B": null
+   "before": 7,
+   "now": null
+  },
+  {
+   "t": "Something unrelated happens here",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Behaviour differs from the design",
+   "expected": null,
+   "before": null,
+   "now": null
+  },
+  {
+   "t": "Report shows an extra empty line",
+   "expected": null,
+   "before": null,
+   "now": null
   }
  ]
 }

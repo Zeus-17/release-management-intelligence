@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RM Markup-Safety and Snapshot Runner</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:system-ui,sans-serif;margin:16px;max-width:900px;line-height:1.5}
+  #status{padding:8px 12px;border-radius:6px;background:#eee;font-weight:600}
+  .ok{background:#d1fae5!important}.bad{background:#fee2e2!important}
+  pre{background:#f6f6f6;padding:10px;overflow:auto;max-height:420px;font-size:12px}
+  iframe{width:1px;height:1px;border:0;position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<h1>RM Markup-Safety and Snapshot Runner</h1>
+<p>Q-15 / Q-17. Two modes (serve the repo root over HTTP):<br>
+<strong><code>?mode=probe</code></strong> (default): fills every user-text field of the tool's data with markup that would run script (<code>&lt;img onerror&gt;</code>) and renders every screen; <em>PASS = nothing executed and no element was created from the text</em>.<br>
+<strong><code>?mode=snapshot</code></strong>: renders every screen with ordinary data (deterministic ids) and compares a hash of each screen with <code>rm-snapshot-baseline.json</code>; <em>PASS = escaping changed nothing a normal user sees</em>. Add <code>&amp;write=1</code> to print a new baseline.</p>
+<div id="status">Loading tool…</div>
+<pre id="out"></pre>
+<iframe id="tool"></iframe>
+<script>
+const P = '<img src=x data-probe=1 onerror="window.__xss=(window.__xss||0)+1">';
+const TEXTKEYS = new Set(['name','rm','teams','stakeholders','constraints','notes','signedBy','outcome','version','promotedBy','title','team','description','owner','mitigation','refId','completedBy','role','raisedBy','summary','customerImpact','techDebt','component','ticket','waiver','org','prefix','label','text','author','reason','message','detail','comment','value','improvements']);
+// enumerations the tool itself controls (delivery-model keys, environment names) are not free text; they are excluded from the probe (documented residual: JS built from keys/ids inside inline handlers)
+const ENUM_ARRAYS = new Set(['deliveryModels','envPath']);
+const TABS = ['dashboard','planner','gates','defects','environments','reports','reference','integration','retrospective','scope-review','calendar','pir'];
+const q = new URLSearchParams(location.search), MODE = q.get('mode') || 'probe';
+const wait = (ms)=> new Promise(r=>setTimeout(r,ms));
+
+function inject(o){
+  if(Array.isArray(o)){ o.forEach((v,i)=>{ if(typeof v==='string') o[i]=P; else inject(v); }); }
+  else if(o && typeof o==='object'){ for(const k of Object.keys(o)){ const v=o[k]; if(typeof v==='string' && TEXTKEYS.has(k)) o[k]=P; else if(v && typeof v==='object' && !ENUM_ARRAYS.has(k)) inject(v); } }
+}
+async function sha(text){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
+function bodyText(win){ const c=win.document.body.cloneNode(true); c.querySelectorAll('script,style,iframe').forEach(e=>e.remove()); return c.innerHTML.replace(/\s+/g,' ').replace(/<span class="save-status[^"]*" id="saveStatus">[^<]*<\/span>/,'<save-status/>').replace(/\b(?=[a-z0-9]*\d)(?=[a-z0-9]*[a-z])[a-z0-9]{10,13}\b/g,'ID'); }   // random ids made by the page before the runner takes over are masked
+
+async function drive(win, doc){
+  win.localStorage.clear();
+  const STATE = win.eval('STATE'), SCENARIOS = win.eval('SCENARIOS');   // const bindings are not window properties
+  let n = 0; win.uid = ()=> 'id' + (++n);
+  // freeze "now" and randomness inside the page so a screen renders identically on every run
+  const FIXED = Date.UTC(2026,9,10,12,0,0), RealDate = win.Date;
+  win.Date = class extends RealDate { constructor(...a){ if(a.length) super(...a); else super(FIXED); } static now(){ return FIXED; } };
+  let seed = 12345; win.Math.random = ()=>{ seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  STATE.releases = []; STATE.defects = [];
+  SCENARIOS.forEach(s=>{ try{ win.loadScenario(s.id); }catch(e){} });
+  const rels = STATE.releases;
+  STATE.defects = rels.slice(0,3).map((r,i)=>({id:'d'+i, title:['Application crash on startup','Card payment declined','Typo in footer label'][i], releaseId:r.id, defectType:'defect', severity:['critical','high','low'][i], priority:'medium', source:'internal', team:'Core Team', component:'Checkout', deliveryModel:'cloud', envFound:'SIT', classification:['blocker','deferred','known'][i], waiver:'', ticket:'T-'+i, status:'open', created:'2026-10-01T09:00:00.000Z'}));
+  if(MODE === 'probe'){
+    // diagnostics: remember WHERE in the tool each unescaped probe was written into the page
+    const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'innerHTML');
+    window.__SINKS__ = window.__SINKS__ || {};
+    Object.defineProperty(win.Element.prototype, 'innerHTML', { configurable:true, get: desc.get, set(v){ if(typeof v==='string' && v.includes('<img src=x data-probe')){ const st=(new Error().stack||'').split('\n').slice(2,4).map(l=>l.trim().replace(/\(?https?:[^)]*rm-tool-v1\.html:/,'@').replace(/\)$/,'')).join(' <- '); window.__SINKS__[st]=(window.__SINKS__[st]||0)+1; } return desc.set.call(this, v); } });
+    inject(STATE.releases); inject(STATE.defects); inject(STATE.settings);
+    win._pendingRisks = [{id:'p1', description:P, category:'technical', owner:P, likelihood:3, impact:3, score:9, mitigation:P, status:'open'}];
+    win._pendingRunbook = [{id:'p2', description:P, owner:P, type:'deploy'}];
+  }
+  win.persistState();
+  const snaps = {}, hitsFrom = {};
+  const record = async (label)=>{ await wait(120); snaps[label] = MODE==='probe' ? doc.querySelectorAll('img[data-probe]').length : bodyText(win); };
+  for(const t of TABS){ try{ win.switchTab(t); }catch(e){ snaps[t]='ERR '+e.message; continue; } await record('tab:'+t); }
+  const relSelects = [...doc.querySelectorAll('select')].filter(s=>/rel/i.test(s.id) && s.id!=='rel-type' && s.id!=='def-release').map(s=>s.id);
+  for(const id of relSelects){
+    const s = doc.getElementById(id); if(!s) continue;
+    for(let i=1;i<s.options.length && i<=3;i++){ s.selectedIndex=i; s.dispatchEvent(new Event('change',{bubbles:true})); await record('select:'+id+':'+i); }
+  }
+  // functions that take a release
+  const r0 = STATE.releases[0];
+  const el = doc.createElement('div'); doc.body.appendChild(el);
+  const calls = [['renderCommsLog',[el,r0.id,r0]],['renderRetroSection',[el,r0.id,r0]],['renderScopeReview',[el,r0.id,r0]],['renderPIRSection',[el,r0.id,r0]],['renderPlannerScopeItems',[r0.id]],
+    ['renderPlannerRisks',[]],['renderPlannerRunbook',[]],['renderPlannerDeps',[]],['renderPendingScopeItems',[]],['renderPlannerComponents',[]],['renderHypercareBanner',[]],['renderBlackoutList',[]],['renderCalendar',[]],['renderTemplates',[]]];
+  for(const [fn,args] of calls){ try{ if(typeof win[fn]==='function') win[fn](...args); }catch(e){ snaps['call:'+fn]='ERR '+e.message; continue; } await record('call:'+fn); }
+  // the Go / No-Go wizard for the first release
+  try{ win.eval("_gngRid = STATE.releases[0].id; _gngStep = 0"); for(let s=0;s<5;s++){ win.eval('_gngStep = '+s); win.renderGNGStep(); await record('gng:'+s); } }catch(e){ snaps['gng']='ERR '+e.message; }
+  el.remove();
+  return {snaps, xss: win.__xss || 0, imgs: doc.querySelectorAll('img[data-probe]').length};
+}
+
+async function main(){
+  const status=document.getElementById('status'), out=document.getElementById('out'), frame=document.getElementById('tool');
+  // start from a clean slate: load once, clear the tool's saved data, then load again so nothing left over from an earlier run is rendered
+  let loaded = new Promise(r=>frame.addEventListener('load',r,{once:true}));
+  frame.src='../rm-tool-v1.html?cb='+Date.now(); await loaded; await wait(400);
+  frame.contentWindow.localStorage.clear();
+  loaded = new Promise(r=>frame.addEventListener('load',r,{once:true}));
+  frame.src='../rm-tool-v1.html?cb='+Date.now()+'b'; await loaded; await wait(900);
+  const win=frame.contentWindow, doc=frame.contentDocument;
+  try{
+    let res = await drive(win, doc);
+    window.__MARKUP__ = res;
+    if(MODE === 'probe'){
+      const bad = res.xss !== 0 || res.imgs !== 0;
+      status.className = bad ? 'bad' : 'ok';
+      status.textContent = bad ? ('MARKUP RAN: handlers fired ' + res.xss + ', elements created ' + res.imgs) : 'PASS: no markup was executed or created from user text on any screen visited';
+      out.textContent = JSON.stringify(res.snaps, null, 1);
+    } else {
+      // Same session, same data: render every screen once with the tool's real escHtml and once with an IDENTITY escHtml (= the old, unescaped behaviour). Equal output proves escaping changes nothing for ordinary text.
+      const hasEsc = typeof win.escHtml === 'function', realEsc = win.escHtml;
+      await drive(win, doc);                 // warm-up: the tool fills some dropdowns lazily on first visit, so compare only fully warmed-up passes
+      const A = (await drive(win, doc)).snaps;
+      if(hasEsc) win.escHtml = (v)=> String(v == null ? '' : v);
+      const B = (await drive(win, doc)).snaps;
+      if(hasEsc) win.escHtml = realEsc;
+      window.__AB__ = {A, B};
+      const labels = Object.keys(A);
+      const diffs = labels.filter(k => A[k] !== B[k]);
+      window.__SNAPDIFF__ = diffs; window.__SNAPCOUNT__ = labels.length;
+      status.className = diffs.length ? 'bad' : 'ok';
+      status.textContent = diffs.length ? ('SNAPSHOT DIFFERS on ' + diffs.length + ' of ' + labels.length + ' screens') : ('PASS: all ' + labels.length + ' screens render identically with and without escaping (escHtml present: ' + hasEsc + ')');
+      out.textContent = diffs.join('\n');
+    }
+  }catch(err){ status.className='bad'; status.textContent='Runner error: '+err.message; out.textContent=err.stack; window.__MARKUP__={error:err.message}; }  finally { try{ frame.contentWindow.localStorage.clear(); }catch(e){} }   // leave no test data behind in the tool's saved data
+}
+main();
+</script>
+</body>
+</html>

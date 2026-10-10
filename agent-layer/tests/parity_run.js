@@ -75,7 +75,7 @@ function makeDom() {
         add: (c) => { if (!cn.split(/\s+/).includes(c)) cn = (cn + ' ' + c).trim(); },
         remove: (c) => { cn = cn.split(/\s+/).filter((x) => x && x !== c).join(' '); }
       };
-      els[id] = { id, value: '', innerHTML: '', textContent: '', get className() { return cn; }, set className(v) { cn = String(v); }, classList };
+      els[id] = { id, value: '', innerHTML: '', textContent: '', dataset: {}, get className() { return cn; }, set className(v) { cn = String(v); }, classList };
     }
     return els[id];
   }
@@ -91,11 +91,11 @@ function makeContext(opts) {
   const ctx = vm.createContext({ console, document: dom.document });
   const src = toolSource();
   const names = ['RELEASE_AI_RULES', 'DEFECT_AI_RULES'].concat(opts.omitGateDefs ? [] : ['GATE_DEFS']);
-  const fns = ['runReleaseAI', 'runDefectAI', 'getGateReadinessHint', 'calculateReadiness'];
+  const fns = ['escHtml', 'stripNegatedTerms', 'matchedTextOf', 'matchedNote', 'runReleaseAI', 'runDefectAI', 'getGateReadinessHint', 'calculateReadiness'];
   const parts = ['const STATE = { selectedDMs: [], defects: [] };', 'let _lastReleaseAIRule = null;']
     .concat(names.map((n) => declaration(src, n))).concat(fns.map((n) => declaration(src, n)));
   parts.push('var __bridge = { STATE: STATE, last: function () { return _lastReleaseAIRule; }, runReleaseAI: runReleaseAI, runDefectAI: runDefectAI, ' +
-    'calculateReadiness: calculateReadiness, getGateReadinessHint: getGateReadinessHint, tables: { RELEASE_AI_RULES: RELEASE_AI_RULES, DEFECT_AI_RULES: DEFECT_AI_RULES' +
+    'calculateReadiness: calculateReadiness, getGateReadinessHint: getGateReadinessHint, matchedNote: matchedNote, tables: { RELEASE_AI_RULES: RELEASE_AI_RULES, DEFECT_AI_RULES: DEFECT_AI_RULES' +
     (opts.omitGateDefs ? '' : ', GATE_DEFS: GATE_DEFS') + ' } };');
   vm.runInContext(parts.join('\n'), ctx, { filename: 'tool-real-source' });
   if (opts.freezeTables !== false) Object.keys(ctx.__bridge.tables).forEach((k) => freezeDeep(ctx.__bridge.tables[k]));
@@ -125,19 +125,6 @@ function makeContext(opts) {
 function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const pick = (r, a) => a[Math.floor(r() * a.length)];
 
-/** Plain-text samples for one alternation token of a rule regex (handles escapes, '.' and '.?'). */
-function tokenSamples(tok) {
-  const base = tok.replace(/\\\//g, '/').replace(/\\(.)/g, '$1');
-  const v = new Set();
-  if (base.includes('.?')) { v.add(base.replace(/\.\?/g, '')); v.add(base.replace(/\.\?/g, ' ')); v.add(base.replace(/\.\?/g, '-')); }
-  else if (base.includes('.')) { v.add(base.replace(/\./g, ' ')); v.add(base.replace(/\./g, '-')); }
-  else v.add(base);
-  return [...v];
-}
-function ruleTokens(rules) {
-  return rules.map((r) => r.pattern.source.split('|').map(tokenSamples).reduce((a, b) => a.concat(b), []));
-}
-
 const ENV_ALL = ['DEV', 'SIT', 'UAT', 'PRE-PROD', 'PROD'];
 const GATE_IDS = ['dev-complete', 'code-review', 'sit', 'uat', 'preprod', 'gng', 'deploy', 'hypercare'];
 const GATE_STATUS = ['not-started', 'pending', 'in-progress', 'passed', 'failed', 'waived'];
@@ -154,7 +141,6 @@ function runAll() {
   const M = makeContext();
   const { b, dom, E } = M;
   const relRules = b.tables.RELEASE_AI_RULES, defRules = b.tables.DEFECT_AI_RULES;
-  const relTok = ruleTokens(relRules), defTok = ruleTokens(defRules);
 
   log('A. the module and the tool agree on shape');
   ok(E && E.tool === 'rm', 'AgentEngine is loaded for the rm tool');
@@ -164,6 +150,7 @@ function runAll() {
 
   // ------------------------------------------------------------------------------------------ B. release_hint parity
   log('B. release_hint == runReleaseAI()');
+  const noteOf = (t) => b.matchedNote(t || '');
   function realRelease(f) {
     dom.el('rel-name').value = f.name; dom.el('rel-notes').value = f.notes;
     b.STATE.selectedDMs = f.dms || [];
@@ -176,47 +163,52 @@ function runAll() {
     dom.guard = true; let env; try { env = E.run('release_hint', { name: f.name, notes: f.notes, deliveryModels: f.dms || [] }); } finally { dom.guard = false; }
     // The legacy engine will happily scan an empty name + notes; the agent path refuses (policy: a missing name is NOT an all-clear).
     if (!f.name) { ok(env.status !== 'computed', label + ' empty name never yields a computed answer: ' + J(env)); return; }
-    const exp = real.shown
-      ? (env.status === 'computed' && env.output.matched)
-      : (env.status === 'computed' && !env.output.matched);
+    const exp = real.shown ? (env.status === 'computed' && env.output.matched) : (env.status === 'computed' && !env.output.matched);
     if (!exp) { ok(false, label + ' matched-state differs: real=' + J(real) + ' export=' + J(env)); return; }
     if (real.shown) {
       const lvl = env.output.level === 'danger' ? 'danger' : env.output.level === 'warn' ? 'warn' : '';
       const cls = ('ai-hint ' + lvl + ' show').replace(/\s+/g, ' ').trim();
       ok(real.cls === cls, label + ' class real=' + real.cls + ' export=' + cls);
-      ok(real.html === '<div class="ai-hint-label">⬡ Intelligence</div>' + env.output.hint_html, label + ' hint html differs');
+      const note = env.output.rule === 'dm_complexity' ? '' : noteOf(env.output.matched_text);
+      ok(real.html === '<div class="ai-hint-label">⬡ Intelligence</div>' + env.output.hint_html + note, label + ' hint html differs\n   real=' + real.html.slice(-200) + '\n   export=' + (env.output.hint_html + note).slice(-200));
       const idx = env.output.rule === 'dm_complexity' ? -1 : Number(env.output.rule.replace('release_rule_', ''));
-      ok(b.last() === (idx >= 0 ? relRules[idx] : b.last()) || idx === -1, label + ' rule index mismatch');
+      ok(idx === -1 || b.last() === relRules[idx], label + ' rule index mismatch');
+      ok(idx === -1 || !!env.output.matched_text, label + ' every keyword hint reports what matched');
     }
   }
-  const relCases = [];
+  const qdir = path.join(__dirname, 'rule-quality');
+  const relPhrases = JSON.parse(fs.readFileSync(path.join(qdir, 'corpus-release.json'), 'utf8')).cases.map((c) => c.t);
+  const defPhrases = JSON.parse(fs.readFileSync(path.join(qdir, 'corpus-defect.json'), 'utf8')).cases.map((c) => c.t);
   const rr = rng(20261010);
-  relTok.forEach((toks, i) => toks.forEach((t) => {
-    [t, t.toUpperCase(), 'x ' + t + ' y', 'pre' + t + 'post', t.slice(0, -1), ' ' + t].forEach((s) => relCases.push({ name: s, notes: '' }, { name: 'Release', notes: s }));
-    relCases.push({ name: 'Release ' + t, notes: 'notes ' + t, dms: [] });
-  }));
-  for (let i = 0; i < relTok.length; i++) for (let j = 0; j < relTok.length; j++) relCases.push({ name: pick(rr, relTok[i]) + ' ' + pick(rr, relTok[j]), notes: '' }); // first-match-wins ordering
-  for (let n = 0; n <= 8; n++) { const dms = DM_ALL.slice(0, n); relCases.push({ name: 'Quarterly housekeeping', notes: '', dms }, { name: 'Payment platform release', notes: '', dms }, { name: 'Docs', notes: 'login', dms }); }
-  for (let k = 0; k < 2500; k++) {
-    const words = []; const len = 1 + Math.floor(rr() * 6);
-    for (let w = 0; w < len; w++) words.push(rr() < 0.35 ? pick(rr, pick(rr, relTok)) : pick(rr, FILLER));
-    const dms = rr() < 0.3 ? DM_ALL.filter(() => rr() < 0.45) : [];
-    relCases.push({ name: words.slice(0, Math.ceil(len / 2)).join(' '), notes: words.slice(Math.ceil(len / 2)).join(' '), dms });
+  const relCases = [];
+  relPhrases.forEach((t) => {
+    [t, t.toUpperCase(), '  ' + t + '  ', 'x ' + t + ' y', t + '.', 'Re: ' + t].forEach((s) => relCases.push({ name: s, notes: '' }));
+    relCases.push({ name: 'Release', notes: t }, { name: t, notes: t });
+  });
+  for (let n = 0; n <= 8; n++) { const dms = DM_ALL.slice(0, n); ['Quarterly housekeeping', 'Payment platform release', 'Urgent hotfix'].forEach((nm) => relCases.push({ name: nm, notes: '', dms })); }
+  for (let k = 0; k < 3000; k++) {   // recombine corpus phrases and filler so rules fire in combinations (first-match-wins ordering, negation next to keywords)
+    const parts = []; const len = 1 + Math.floor(rr() * 4);
+    for (let w = 0; w < len; w++) parts.push(rr() < 0.7 ? pick(rr, relPhrases) : pick(rr, FILLER));
+    relCases.push({ name: parts.slice(0, Math.ceil(len / 2)).join(' '), notes: parts.slice(Math.ceil(len / 2)).join(' '), dms: rr() < 0.25 ? DM_ALL.filter(() => rr() < 0.45) : [] });
   }
+  ['non-urgent cleanup', 'Not an emergency', 'no hotfix needed', 'without payment impact', 'urgent, not payment related', 'NON-URGENT PAYMENT RUN', 'never a P1 here'].forEach((t) => relCases.push({ name: t, notes: '' }));
   relCases.push({ name: 'x', notes: '' }, { name: 'Webhook update', notes: 'Stripe webhook listener update' }, { name: '', notes: 'checkout flow changes' }, { name: 'PAYMENT', notes: '' });
   relCases.forEach((f, i) => checkRelease(f, 'release#' + i + ' ' + J(f).slice(0, 80)));
   log('   ' + relCases.length + ' release cases');
 
   // ------------------------------------------------------------------------------------------ C. defect_hint parity
   log('C. defect_hint == runDefectAI()');
-  function realDefect(title) {
-    dom.el('def-title').value = title; dom.el('def-sev').value = 'low'; dom.el('def-class').value = 'known';
+  function realDefect(title, userSet) {
+    const sevEl = dom.el('def-sev'), clsEl = dom.el('def-class');
+    sevEl.value = 'low'; clsEl.value = 'known';
+    if (userSet) { sevEl.dataset.userSet = '1'; clsEl.dataset.userSet = '1'; } else { delete sevEl.dataset.userSet; delete clsEl.dataset.userSet; }
+    dom.el('def-title').value = title;
     const hint = dom.el('def-ai-hint'); hint.className = 'ai-hint'; dom.el('def-ai-hint-text').innerHTML = '';
     b.runDefectAI();
-    return { shown: hint.classList.contains('show'), cls: hint.className.replace(/\s+/g, ' ').trim(), html: dom.el('def-ai-hint-text').innerHTML, sev: dom.el('def-sev').value, kls: dom.el('def-class').value };
+    return { shown: hint.classList.contains('show'), cls: hint.className.replace(/\s+/g, ' ').trim(), html: dom.el('def-ai-hint-text').innerHTML, sev: sevEl.value, kls: clsEl.value };
   }
   function checkDefect(title, label) {
-    const real = realDefect(title);
+    const real = realDefect(title, false);
     dom.guard = true; let env; try { env = E.run('defect_hint', { title }); } finally { dom.guard = false; }
     const short = title.trim().length < 8;
     if (short) { ok(!real.shown && env.status === 'not_assessed' && env.missing[0].reason_code === 'title_too_short' && real.sev === 'low' && real.kls === 'known', label + ' short title: real shows nothing, export is not_assessed ' + J(env)); return; }
@@ -224,18 +216,22 @@ function runAll() {
     ok(env.status === 'computed' && env.output.matched, label + ' should match: ' + J(env));
     if (env.status !== 'computed') return;
     ok(real.sev === env.output.suggested_severity && real.kls === env.output.suggested_classification, label + ' suggestion real=' + real.sev + '/' + real.kls + ' export=' + env.output.suggested_severity + '/' + env.output.suggested_classification);
-    ok(real.html === '<div class="ai-hint-label">⬡ Intelligence</div>' + env.output.hint_html, label + ' hint html differs');
+    ok(real.html === '<div class="ai-hint-label">⬡ Intelligence</div>' + env.output.hint_html + noteOf(env.output.matched_text), label + ' hint html differs');
     ok(real.cls === ('ai-hint ' + (defRules[Number(env.output.rule.replace('defect_rule_', ''))].sev === 'critical' ? 'danger' : 'warn') + ' show'), label + ' class ' + real.cls);
+    // Q-6: a choice the user already made is kept, and the suggestion is shown instead
+    const kept = realDefect(title, true);
+    ok(kept.sev === 'low' && kept.kls === 'known', label + ' user-chosen severity / classification are not overwritten');
+    const differs = env.output.suggested_severity !== 'low' || env.output.suggested_classification !== 'known';
+    ok(differs === /your own choice has been kept/.test(kept.html), label + ' the suggestion is shown exactly when it differs from the user\'s choice');
   }
   const defCases = [];
-  defTok.forEach((toks) => toks.forEach((t) => ['Crash ' + t, t + ' in the module', 'Issue: ' + t.toUpperCase(), 'xx' + t + 'yy extra', t, 'The ' + t.slice(0, -1) + ' thing'].forEach((s) => defCases.push(s))));
-  for (let i = 0; i < defTok.length; i++) for (let j = 0; j < defTok.length; j++) defCases.push(pick(rr, defTok[i]) + ' and ' + pick(rr, defTok[j]));
+  defPhrases.forEach((t) => { [t, t.toUpperCase(), '  ' + t, t + '!!', 'Bug: ' + t].forEach((s) => defCases.push(s)); });
   for (let n = 0; n <= 10; n++) { defCases.push('a'.repeat(n)); defCases.push(' '.repeat(n) + 'crash'); defCases.push('crash' + ' '.repeat(n)); defCases.push('payment'.slice(0, Math.min(7, n))); }
   ['Application crash on startup', 'Card payment declined incorrectly', 'Download button misaligned', 'crash!!', 'Typo in footer label', '        ', 'Something unrelated happens here'].forEach((s) => defCases.push(s));
-  for (let k = 0; k < 2500; k++) {
-    const words = []; const len = 1 + Math.floor(rr() * 6);
-    for (let w = 0; w < len; w++) words.push(rr() < 0.35 ? pick(rr, pick(rr, defTok)) : pick(rr, FILLER));
-    defCases.push(words.join(' '));
+  for (let k = 0; k < 3000; k++) {
+    const parts = []; const len = 1 + Math.floor(rr() * 3);
+    for (let w = 0; w < len; w++) parts.push(rr() < 0.75 ? pick(rr, defPhrases) : pick(rr, FILLER));
+    defCases.push(parts.join(' '));
   }
   defCases.forEach((t, i) => checkDefect(t, 'defect#' + i + ' ' + J(t).slice(0, 60)));
   log('   ' + defCases.length + ' defect cases');
@@ -260,12 +256,19 @@ function runAll() {
     b.STATE.defects = [];
     return out;
   }
+  const FIVE = ['score', 'gates', 'defects', 'envs', 'signoffs'];
   function checkReadiness(inp, label) {
     const real = realReadiness(inp);
-    dom.guard = true; let leg, env; try { leg = E._test.legacyReadiness(inp); env = E.run('readiness', inp); } finally { dom.guard = false; }
-    const same = ['score', 'gates', 'defects', 'envs', 'signoffs'].every((k) => Object.is(real[k], leg[k]));
-    ok(same, label + ' numbers real=' + J(real) + ' mirror=' + J(leg));
-    if (inp.gates.length && inp.envPath.length) ok(env.status === 'computed' && ['score', 'gates', 'defects', 'envs', 'signoffs'].every((k) => env.output[k] === real[k]), label + ' envelope ' + J(env));
+    dom.guard = true; let env, mirror; try { env = E.run('readiness', inp); mirror = (inp.gates.length && inp.envPath.length) ? E._test.legacyReadiness(inp) : null; } finally { dom.guard = false; }
+    if (!inp.gates.length || !inp.envPath.length) {
+      // Q-7 / Q-8: the tool reports "not assessed" (no number) and the export refuses to answer - the same meaning
+      ok(real.notAssessed === true && real.score === null && real.reason === (!inp.gates.length ? 'no_gates' : 'no_environments'), label + ' tool reports not assessed: ' + J(real));
+      ok(env.status === 'cannot_be_determined' || env.status === 'rejected', label + ' export refuses a score: ' + J(env));
+      return;
+    }
+    ok(FIVE.every((k) => Object.is(real[k], mirror[k])), label + ' numbers real=' + J(real) + ' mirror=' + J(mirror));
+    ok(env.status === 'computed' && FIVE.every((k) => env.output[k] === real[k]), label + ' envelope ' + J(env));
+    ok(real.failedGates === inp.gates.filter((g) => g.status === 'failed').length, label + ' failed-gate count (Q-10)');
   }
   const rd = rng(7);
   const rdCases = [];
@@ -274,18 +277,9 @@ function runAll() {
     rdCases.push({ gates: Array.from({ length: 4 }, (_, i) => ({ id: GATE_IDS[i], status: i < gp ? 'passed' : 'pending', signedBy: sg && i < gp ? 'S' : '' })),
       defects: Array.from({ length: bl }, () => ({ releaseId: 'REL-T', classification: 'blocker' })), envPath: ENV_ALL, environments: ENV_ALL.map((e, i) => ({ env: e, health: i < h ? 'healthy' : 'unknown' })) });
   }))));
+  rdCases.push({ gates: [], defects: [], envPath: ENV_ALL, environments: ENV_ALL.map((e) => ({ env: e, health: 'healthy' })) });             // no gates  -> not assessed
+  rdCases.push({ gates: [{ id: 'sit', status: 'passed', signedBy: 'S' }], defects: [], envPath: [], environments: [] });                         // no envs   -> not assessed
   rdCases.forEach((c, i) => checkReadiness(c, 'readiness#' + i));
-  // legacy artefacts: the mirror reproduces them (parity), the export REFUSES them (policy)
-  {
-    const noGates = { gates: [], defects: [], envPath: ENV_ALL, environments: ENV_ALL.map((e) => ({ env: e, health: 'healthy' })) };
-    const emptyPath = { gates: [{ id: 'sit', status: 'passed', signedBy: 'S' }], defects: [], envPath: [], environments: [] };
-    checkReadiness(noGates, 'zero-gates artefact'); checkReadiness(emptyPath, 'empty-path artefact');
-    const a = E.run('readiness', noGates), c = E.run('readiness', emptyPath);
-    ok(a.status === 'rejected' || a.status === 'cannot_be_determined', 'zero gates is never a computed score: ' + J(a));
-    ok(c.status === 'rejected' || c.status === 'cannot_be_determined', 'empty environment path is never a computed score: ' + J(c));
-    ok(Number.isNaN(realReadiness(emptyPath).envs), 'sanity: the REAL engine still yields NaN for an empty path (characterised, not fixed)');
-    ok(realReadiness(noGates).gates === 0 && realReadiness(noGates).signoffs === 0, 'sanity: the real engine zero-gates behaviour is as characterised');
-  }
   log('   ' + rdCases.length + ' readiness cases');
 
   // ------------------------------------------------------------------------------------------ E. gate_hint parity

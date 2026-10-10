@@ -1,0 +1,25 @@
+{
+ "status": "The ORIGINAL keyword patterns (before the Q-1/Q-2 change set of 2026-10-10), kept so the rule-quality report can show before and after.",
+ "flags": "i",
+ "release_hint": {
+  "0": "payment|checkout|billing|invoice|transaction|pci|finance|banking|fx|trading|settlement",
+  "1": "auth|login|sso|oauth|saml|identity|password|credential|2fa|mfa|ldap|active directory",
+  "2": "database|schema|migration|db |sql |postgres|mysql|oracle|mongo|elastic|data model|index",
+  "3": "emergency|urgent|p1|critical fix|hotfix|hot-fix|sev1|severity 1|major incident",
+  "4": "mobile|ios|android|app store|google play|testflight",
+  "5": "gdpr|personal data|pii|data subject|ico|privacy|data protection|dpa",
+  "6": "third.party|supplier|vendor|api integration|external service|saas|partner api",
+  "7": "pilot|beta|preview|canary|feature flag|dark launch|a/b|limited release",
+  "8": "decommission|deprecat|sunset|end of life|eol|remove|retire|turn off"
+ },
+ "defect_hint": {
+  "0": "crash|null pointer|npe|unhandled exception|500|fatal|outage|unavailable|down|not responding",
+  "1": "payment|transaction|billing|checkout|card|pci|fraud|financial|money|fund|transfer",
+  "2": "login|auth|sign.?in|password|sso|token|session|403|401|locked out|cannot access",
+  "3": "data loss|corruption|overwrite|deleted|missing record|wrong data|data integrity|incorrect calculation",
+  "4": "performance|slow|timeout|latency|response time|page load|memory leak|cpu|high load",
+  "5": "cosmetic|typo|spelling|colour|color|font|margin|padding|alignment|icon|label text",
+  "6": "mobile|ios|android|safari|chrome|firefox|edge|browser|responsive|tablet",
+  "7": "security|vulnerability|cve|xss|sql injection|csrf|injection|exploit|exposure|breach"
+ }
+}

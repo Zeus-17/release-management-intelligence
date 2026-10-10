@@ -35,11 +35,11 @@ calculateReadiness() - score = gates*0.40 + defects*0.30 + envs*0.20 + signoffs*
 | `gates[].id` | **Block** (`gate_identity_missing`) | cannot be determined | yes | Cannot place a gate in the gate set. |
 | `gates[].status` | Fallback `"not-started"` | computed + caveat `gate_status_treated_as_not_started` | yes | Conservative: only passed/waived add to the score, and 'not-started' is the form default at gate creation. |
 | `gates[].signedBy` | Fallback `""` | computed + caveat `signoff_treated_as_missing` | yes | Conservative: a blank sign-off lowers the sign-off component, matching the form default. |
-| `gates` | **Block** (`gates_missing`) | cannot be determined | yes | Legacy engine returns 50/100 for a release with zero gates (defects+environments still score) and 0/0 sign-offs - an artefact, not a verdict. The agent path refuses to produce it. |
+| `gates` | **Block** (`gates_missing`) | cannot be determined | yes | With zero gates the old engine returned 50/100 (an artefact). Since Q-7 (2026-10-10) the tool itself reports 'not assessed'; the agent path refuses to produce a score as well. |
 | `defects` | **Block** (`defect_list_unknown`) | cannot be determined | yes | If the defect list is unknown the 30% defect component cannot be computed; defaulting to 'no defects' would score a possibly-blocked release as clear. |
 | `defects[].releaseId` | **Block** (`defect_release_unknown`) | cannot be determined | yes | A defect that cannot be attributed to a release cannot be included or excluded safely. |
 | `defects[].classification` | **Block** (`defect_classification_unknown`) | cannot be determined | yes | NOT conservative to default: an unresolved defect defaulted to non-blocker could hide a release blocker (30% of the score). Hard block. |
-| `envPath` | **Block** (`env_path_missing`) | cannot be determined | yes | Legacy engine divides by envPath.length: an empty path yields NaN. The agent path refuses to produce it. |
+| `envPath` | **Block** (`env_path_missing`) | cannot be determined | yes | With an empty path the old engine divided by zero and returned NaN. Since Q-8 (2026-10-10) the tool itself reports 'not assessed'; the agent path refuses to produce a score as well. |
 | `environments` | Fallback `[]` | computed + caveat `environments_treated_as_unknown` | yes | Conservative: an environment with no health reading scores exactly like 'unknown' (not healthy). |
 | `environments[].env` | **Block** (`environment_identity_missing`) | cannot be determined | yes | Cannot place a health reading in the path. |
 | `environments[].health` | Fallback `"unknown"` | computed + caveat `env_health_treated_as_unknown` | yes | Conservative: 'unknown' is the form default and scores as not healthy, exactly like warning/blocked. |

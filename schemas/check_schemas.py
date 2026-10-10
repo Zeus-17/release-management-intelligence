@@ -30,13 +30,16 @@ def check_outputs(outputs, check):
 
     n = 0
     for fid, r in base["readiness"].items():
-        res = {"engine": "readiness", "status": "computed", "output": r, "caveats": []}
-        valid = v("readiness").is_valid(res)
-        if fid == "ready-S11-emptyenvs":
-            check(not valid, "NaN readiness artefact (empty envPath) must NOT validate as a computed result")
-        else:
-            check(valid, f"readiness output {fid} does not fit the output schema")
+        if r.get("notAssessed"):
+            # Q-7 / Q-8: the tool now reports "not assessed" (no score) for no gates / no environments. It must never be mistakable for a computed score.
+            res = {"engine": "readiness", "status": "computed", "output": {k: r[k] for k in ("score", "gates", "defects", "envs", "signoffs")}, "caveats": []}
+            check(not v("readiness").is_valid(res), f"readiness {fid}: a not-assessed result must NOT validate as a computed score")
             n += 1
+            continue
+        five = {k: r[k] for k in ("score", "gates", "defects", "envs", "signoffs")}   # failedGates is a display flag, not part of the schema output
+        res = {"engine": "readiness", "status": "computed", "output": five, "caveats": []}
+        check(v("readiness").is_valid(res), f"readiness output {fid} does not fit the output schema")
+        n += 1
     for fid, r in base["release"].items():
         out = {"matched": bool(r["shown"]), "complete": True}
         if r["shown"]:

@@ -46,18 +46,17 @@ const htmlNorm = (s)=>{ const d=document.createElement('div'); d.innerHTML=s; re
 async function runAll(win, doc){
   const E = win.AgentEngine;
   ok(!!E && E.ready().ok, 'AgentEngine is embedded and its tables are present: ' + (E ? J(E.ready()) : 'missing'));
-  const relRules = win.eval('RELEASE_AI_RULES'), defRules = win.eval('DEFECT_AI_RULES');
-  const relTok = ruleTokens(relRules), defTok = ruleTokens(defRules);
+
+  // ---- release_hint vs runReleaseAI() (real DOM). Phrases come from the labelled corpus so every rule is exercised the way people write.
+  const relPhrases = (await (await fetch('../agent-layer/tests/rule-quality/corpus-release.json',{cache:'no-store'})).json()).cases.map(c=>c.t);
+  const defPhrases = (await (await fetch('../agent-layer/tests/rule-quality/corpus-defect.json',{cache:'no-store'})).json()).cases.map(c=>c.t);
   const r = rng(424242);
   let nRel=0, nDef=0, nRd=0, nGate=0, nRisk=0;
-
-  // ---- release_hint vs runReleaseAI() (real DOM)
   const relCases = [];
-  relTok.forEach(toks=>toks.forEach(t=>{ [t,t.toUpperCase(),'x '+t+' y','pre'+t+'post'].forEach(s=>relCases.push({name:s,notes:''})); relCases.push({name:'Release',notes:s0(t)}); }));
-  function s0(t){ return 'notes '+t; }
-  for(let i=0;i<relTok.length;i++) for(let j=0;j<relTok.length;j++) relCases.push({name:pick(r,relTok[i])+' '+pick(r,relTok[j]),notes:''});
+  relPhrases.forEach(t=>{ [t,t.toUpperCase(),'x '+t+' y'].forEach(s=>relCases.push({name:s,notes:''})); relCases.push({name:'Release',notes:t}); });
   for(let n=0;n<=8;n++){ const dms=DM_ALL.slice(0,n); relCases.push({name:'Quarterly housekeeping',notes:'',dms},{name:'Payment platform release',notes:'',dms}); }
-  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*6); for(let q=0;q<len;q++) w.push(r()<0.35?pick(r,pick(r,relTok)):pick(r,FILLER)); relCases.push({name:w.slice(0,Math.ceil(len/2)).join(' '),notes:w.slice(Math.ceil(len/2)).join(' '),dms:r()<0.3?DM_ALL.filter(()=>r()<0.45):[]}); }
+  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*3); for(let q=0;q<len;q++) w.push(r()<0.7?pick(r,relPhrases):pick(r,FILLER)); relCases.push({name:w[0],notes:w.slice(1).join(' '),dms:r()<0.25?DM_ALL.filter(()=>r()<0.45):[]}); }
+  ['non-urgent cleanup','Not an emergency','no hotfix needed','without payment impact','NON-URGENT PAYMENT RUN'].forEach(t=>relCases.push({name:t,notes:''}));
   for(const f of relCases){
     nRel++;
     doc.getElementById('rel-name').value=f.name; doc.getElementById('rel-notes').value=f.notes;
@@ -72,33 +71,40 @@ async function runAll(win, doc){
     if(shown && env.output.matched){
       const lvl=env.output.level==='danger'?'danger':env.output.level==='warn'?'warn':'';
       ok(cls===norm('ai-hint '+lvl+' show'),'release class '+J(f)+' '+cls);
-      ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html),'release html '+J(f));
+      const note = env.output.rule==='dm_complexity' ? '' : win.matchedNote(env.output.matched_text);
+      ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html+note),'release html '+J(f));
     }
   }
   win.eval('STATE.selectedDMs = []');
 
-  // ---- defect_hint vs runDefectAI() (real DOM; the legacy code WRITES severity/classification)
+  // ---- defect_hint vs runDefectAI() (real DOM; the tool suggests, and keeps a choice the user already made)
   win.populateSevDropdown();
   const defCases=[];
-  defTok.forEach(toks=>toks.forEach(t=>['Crash '+t,t+' in the module','Issue: '+t.toUpperCase(),'xx'+t+'yy extra'].forEach(s=>defCases.push(s))));
-  for(let i=0;i<defTok.length;i++) for(let j=0;j<defTok.length;j++) defCases.push(pick(r,defTok[i])+' and '+pick(r,defTok[j]));
+  defPhrases.forEach(t=>{ [t,t.toUpperCase(),'Bug: '+t].forEach(s=>defCases.push(s)); });
   for(let n=0;n<=10;n++){ defCases.push('a'.repeat(n)); defCases.push(' '.repeat(n)+'crash'); }
   ['Application crash on startup','Download button misaligned','crash!!','Typo in footer label','Something unrelated happens here'].forEach(s=>defCases.push(s));
-  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*6); for(let q=0;q<len;q++) w.push(r()<0.35?pick(r,pick(r,defTok)):pick(r,FILLER)); defCases.push(w.join(' ')); }
+  for(let k=0;k<500;k++){ const w=[]; const len=1+Math.floor(r()*3); for(let q=0;q<len;q++) w.push(r()<0.75?pick(r,defPhrases):pick(r,FILLER)); defCases.push(w.join(' ')); }
   const sevOpts = [...doc.getElementById('def-sev').options].map(o=>o.value), clsOpts=[...doc.getElementById('def-class').options].map(o=>o.value);
   const sevS = sevOpts.includes('low')?'low':sevOpts[0], clsS = clsOpts.includes('known')?'known':clsOpts[0];
+  const sevEl = doc.getElementById('def-sev'), clsEl = doc.getElementById('def-class');
   for(const title of defCases){
     nDef++;
-    doc.getElementById('def-title').value=title; doc.getElementById('def-sev').value=sevS; doc.getElementById('def-class').value=clsS;
+    delete sevEl.dataset.userSet; delete clsEl.dataset.userSet;
+    doc.getElementById('def-title').value=title; sevEl.value=sevS; clsEl.value=clsS;
     const box=doc.getElementById('def-ai-hint'); box.className='ai-hint'; doc.getElementById('def-ai-hint-text').innerHTML='';
     win.runDefectAI();
-    const shown=box.classList.contains('show'), html=doc.getElementById('def-ai-hint-text').innerHTML, sev=doc.getElementById('def-sev').value, kls=doc.getElementById('def-class').value;
+    const shown=box.classList.contains('show'), html=doc.getElementById('def-ai-hint-text').innerHTML, sev=sevEl.value, kls=clsEl.value;
     const env=E.run('defect_hint',{title});
     if(title.trim().length<8){ ok(!shown && env.status==='not_assessed' && sev===sevS && kls===clsS,'defect short '+J(title)); continue; }
     if(!shown){ ok(env.status==='computed' && !env.output.matched && sev===sevS && kls===clsS,'defect nomatch '+J(title)); continue; }
     ok(env.status==='computed' && env.output.matched && sev===env.output.suggested_severity && kls===env.output.suggested_classification,'defect suggestion '+J(title)+' real='+sev+'/'+kls);
-    ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html),'defect html '+J(title));
+    ok(html===htmlNorm('<div class="ai-hint-label">⬡ Intelligence</div>'+env.output.hint_html+win.matchedNote(env.output.matched_text)),'defect html '+J(title));
+    // Q-6: the user picks a severity / classification first, then types the title - their choice stays
+    sevEl.dataset.userSet='1'; clsEl.dataset.userSet='1'; sevEl.value=sevS; clsEl.value=clsS; box.className='ai-hint'; doc.getElementById('def-ai-hint-text').innerHTML='';
+    win.runDefectAI();
+    ok(sevEl.value===sevS && clsEl.value===clsS,'defect user choice kept '+J(title));
   }
+  delete sevEl.dataset.userSet; delete clsEl.dataset.userSet;
 
   // ---- readiness vs calculateReadiness()
   const savedDefects = win.eval('JSON.stringify(STATE.defects)');
@@ -115,13 +121,17 @@ async function runAll(win, doc){
     const envObj={}; inp.environments.forEach(e=>{ if(!(e.env in envObj)) envObj[e.env]={health:e.health}; });
     const real=win.calculateReadiness({id:'REL-T',gates:inp.gates,envPath:inp.envPath,environments:envObj});
     const env=E.run('readiness',inp);
-    ok(env.status==='computed' && ['score','gates','defects','envs','signoffs'].every(k2=>env.output[k2]===real[k2]),'readiness '+J(real)+' vs '+J(env));
+    ok(env.status==='computed' && ['score','gates','defects','envs','signoffs'].every(k2=>env.output[k2]===real[k2]) && real.failedGates===inp.gates.filter(g=>g.status==='failed').length,'readiness '+J(real)+' vs '+J(env));
   }
-  // legacy artefacts exist in the real engine; the export refuses them
+  // degenerate cases: the tool says "not assessed" (no number) and the export refuses to answer
   win.eval('STATE.defects = []');
-  const nan = win.calculateReadiness({id:'REL-T',gates:[{id:'sit',status:'passed',signedBy:'S'}],envPath:[],environments:{}});
-  ok(Number.isNaN(nan.envs),'real engine: empty environment path still yields NaN (characterised)');
-  ok(E.run('readiness',{gates:[{id:'sit',status:'passed',signedBy:'S'}],defects:[],envPath:[],environments:[]}).status!=='computed','export refuses the empty-path artefact');
+  const noGates = win.calculateReadiness({id:'REL-T',gates:[],envPath:ENV_ALL,environments:{}});
+  const noEnvs = win.calculateReadiness({id:'REL-T',gates:[{id:'sit',status:'passed',signedBy:'S'}],envPath:[],environments:{}});
+  ok(noGates.notAssessed===true && noGates.score===null && noGates.reason==='no_gates','tool reports not assessed for no gates: '+J(noGates));
+  ok(noEnvs.notAssessed===true && noEnvs.score===null && noEnvs.reason==='no_environments','tool reports not assessed for no environments: '+J(noEnvs));
+  ok(E.run('readiness',{gates:[],defects:[],envPath:ENV_ALL,environments:[]}).status!=='computed','export refuses a score for no gates');
+  ok(E.run('readiness',{gates:[{id:'sit',status:'passed',signedBy:'S'}],defects:[],envPath:[],environments:[]}).status!=='computed','export refuses a score for no environments');
+  ok(/not assessed/.test(win.renderReadinessRing(null)) && !/NaN/.test(win.renderReadinessRing(null)),'the ring shows "not assessed", never NaN');
   win.eval('STATE.defects = '+savedDefects);
 
   // ---- gate_hint vs getGateReadinessHint()

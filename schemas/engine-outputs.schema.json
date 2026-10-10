@@ -122,6 +122,10 @@
          "type": "string",
          "description": "Verbatim engine text. Never reworded."
         },
+        "matched_text": {
+         "type": "string",
+         "description": "The words in the text that triggered the rule (Q-5). Display aid: a hint is a keyword match, not an assessment."
+        },
         "complete": {
          "type": "boolean",
          "description": "False whenever a fallback or skipped check means 'nothing found' must NOT be read as 'all clear'."
@@ -261,6 +265,10 @@
         },
         "hint_html": {
          "type": "string"
+        },
+        "matched_text": {
+         "type": "string",
+         "description": "The words in the title that triggered the rule (Q-5)."
         }
        }
       },
