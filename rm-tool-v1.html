@@ -5810,6 +5810,19 @@ function getContentURLs(){
   return urls;
 }
 
+// Last content version + notice IDs this browser has seen. Returns null if none stored/unreadable.
+const CONTENT_SEEN_KEY = 'rm_content_seen_v1';
+function readSeenContent(){
+  try{
+    const s = JSON.parse(localStorage.getItem(CONTENT_SEEN_KEY)||'null');
+    if(s && Array.isArray(s.warningIds)) return s;
+  }catch(e){}
+  return null;
+}
+function writeSeenContent(version, warningIds){
+  try{ localStorage.setItem(CONTENT_SEEN_KEY, JSON.stringify({ version, warningIds })); }catch(e){}
+}
+
 function checkContentUpdate(manual=false){
   // Use cache unless manual or expired
   if(!manual){
@@ -5838,18 +5851,25 @@ function fetchContentFromChain(urls, manual){
     .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(data => {
       if(!data || !data.meta) throw new Error('Invalid format');
-      const prevVersion = _contentLayer?.meta?.content_version;
+      // Compare against the last content this browser saw (persisted), not _contentLayer:
+      // clearContentCache() nulls _contentLayer, which made Force refresh always report "current".
       const newVersion  = data.meta.content_version;
-      const isNew       = !!prevVersion && prevVersion !== newVersion;
+      const prev        = readSeenContent();
+      const newIds      = (data.content_warnings||[]).map(w=>w.id).filter(Boolean);
+      const addedIds    = prev ? newIds.filter(id => !prev.warningIds.includes(id)) : [];
+      const versionBump = !!prev && !!prev.version && prev.version !== newVersion;
+      const isNew       = versionBump || addedIds.length > 0;
       try{ localStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify({ fetched_at:Date.now(), data, source })); }catch(e){}
+      writeSeenContent(newVersion, newIds);
       applyContentLayer(data, source);
+      const what = versionBump ? `to ${newVersion}` : `(${addedIds.length} new notice${addedIds.length===1?'':'s'})`;
       if(manual){
         showToast(isNew
-          ? `✓ Content updated to ${newVersion} — framework & regulatory guidance refreshed.`
+          ? `✓ Content updated ${what} — framework & regulatory guidance refreshed.`
           : `Content is current (${newVersion}) — no updates available.`,
           'success', 4500);
       } else if(isNew){
-        showToast(`Framework guidance updated to ${newVersion}.`, 'info', 4000);
+        showToast(`Framework guidance updated ${what}.`, 'info', 4000);
         setContentUpdateIndicator(true);
       }
     })
