@@ -19,7 +19,7 @@ Serve the repo root over HTTP (e.g. <code>python -m http.server 3031</code>) and
 Compares against <code>rm-baseline.json</code> when present. See <code>Step0-Source-Verification-Findings.md</code> and RM matrix section 29.</p>
 <div id="status">Loading tool…</div>
 <pre id="out"></pre>
-<iframe id="tool" src="../rm-tool-v1.html"></iframe>
+<iframe id="tool"></iframe>
 
 <script>
 /* ---------------------------------------------------------------
@@ -191,7 +191,14 @@ function diff(a, b, path=''){
 async function main(){
   const status = document.getElementById('status'), out = document.getElementById('out');
   const frame = document.getElementById('tool');
-  await new Promise(r => frame.contentDocument && frame.contentDocument.readyState==='complete' ? r() : frame.addEventListener('load', r, {once:true}));
+  // Always test the file as it is on disk NOW: cache-bust the load and show the hash of what was fetched.
+  // (A cached tool copy previously produced a false PASS — the hash makes staleness visible.)
+  const fresh = await (await fetch('../rm-tool-v1.html', {cache:'no-store'})).text();
+  const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(fresh));
+  window.__TOOLSHA__ = Array.from(new Uint8Array(hashBuf)).map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,12);
+  const loaded = new Promise(r => frame.addEventListener('load', r, {once:true}));
+  frame.src = '../rm-tool-v1.html?cb=' + Date.now();
+  await loaded;
   await new Promise(r => setTimeout(r, 800)); // let the tool's own init finish
   try{
     window.__RESULT__ = await runAll();
@@ -205,7 +212,7 @@ async function main(){
       window.__DIFF__ = diff(base, window.__RESULT__);
       const n = window.__DIFF__.length;
       status.className = n ? 'bad' : 'ok';
-      status.textContent = n ? ('DIFF: ' + n + ' difference(s) from baseline') : 'PASS: identical to baseline';
+      status.textContent = (n ? ('DIFF: ' + n + ' difference(s) from baseline') : 'PASS: identical to baseline') + '  [tool sha256:' + window.__TOOLSHA__ + ']';
       out.textContent = n ? JSON.stringify(window.__DIFF__, null, 1) : '';
     }
   }catch(err){

@@ -4024,8 +4024,9 @@ The Scaled Agile Framework organises release management around <strong>Programme
 <div class="hint-banner hint-warn" style="margin-bottom:12px;font-size:11px;"><strong>Note:</strong> This is guidance only. Verify all regulatory requirements with your compliance and legal teams. Regulations evolve — check for current versions.</div>
 <strong>EU DORA (Digital Operational Resilience Act) — Regulation (EU) 2022/2554</strong><br>
 <ul style="margin:8px 0 8px 16px;font-size:12px;line-height:1.8;color:var(--text2);">
-  <li><strong>Article 9</strong> — Financial entities must implement ICT change management procedures covering testing, approval, documentation, and post-implementation review for all changes to ICT systems.</li>
-  <li><strong>Article 9(4)(e)</strong> — Changes to ICT systems must be subject to formal approval by authorised personnel prior to implementation.</li>
+  <li><strong>Article 9(4)(e)</strong> — Financial entities must implement documented policies, procedures and controls for ICT change management, based on a risk assessment approach, so that all changes to ICT systems are recorded, tested, assessed, approved, implemented and verified in a controlled manner. The ICT change management process must be approved by appropriate lines of management and have specific protocols in place.</li>
+  <li><strong>Article 9(4)(f)</strong> — Financial entities must have appropriate and comprehensive documented policies for patches and updates.</li>
+  <li><strong>Article 19</strong> — Major ICT-related incidents must be reported to the competent authority. <strong>Article 23</strong> covers operational or security payment-related incidents for credit institutions, payment institutions, account information service providers and electronic money institutions.</li>
   <li><strong>Applicability:</strong> EU financial entities (banks, insurers, investment firms, payment institutions, etc.). UK equivalents under FCA operational resilience rules.</li>
 </ul>
 <strong>FCA — Operational Resilience</strong><br>
@@ -5351,7 +5352,7 @@ document.addEventListener('keydown', e => {
 // ═══════════════════════════════════════════════════════
 //  AUTO-UPDATE — content version check
 // ═══════════════════════════════════════════════════════
-const BAKED_CONTENT_VERSION = '2026-05-29'; // updated when content JSON changes
+const BAKED_CONTENT_VERSION = '2026-10-10'; // updated when content JSON changes
 
 function checkContentUpdate(){
   fetch('rm-content-v1.json?_=' + Date.now(), { cache:'no-store' })
@@ -5402,7 +5403,7 @@ const RELEASE_AI_RULES = [
     id: 'payment',
     pattern: /payment|checkout|billing|invoice|transaction|pci|finance|banking|fx|trading|settlement/i,
     level: 'danger',
-    hint: '<strong>Payment / Financial system detected.</strong> This release likely has regulatory obligations. Ensure: DORA Article 9 change authorisation is documented; PCI-DSS scope is assessed if card data is involved; CAB approval is obtained before go-live; rollback and incident escalation paths are pre-agreed with your CISO and compliance team.'
+    hint: '<strong>Payment / Financial system detected.</strong> This release likely has regulatory obligations. Ensure: change-management controls under DORA Article 9(4)(e) are evidenced (the change is recorded, tested, assessed, approved, implemented and verified); PCI-DSS scope is assessed if card data is involved; CAB approval is obtained before go-live; rollback and incident escalation paths are pre-agreed with your CISO and compliance team.'
   },
   {
     pattern: /auth|login|sso|oauth|saml|identity|password|credential|2fa|mfa|ldap|active directory/i,
@@ -5522,7 +5523,7 @@ const DEFECT_AI_RULES = [
   {
     pattern: /security|vulnerability|cve|xss|sql injection|csrf|injection|exploit|exposure|breach/i,
     sev: 'critical', cls: 'blocker',
-    hint: '<strong>Security vulnerability detected.</strong> Security defects are always Release Blockers. Additionally: notify your CISO and security team immediately; assess whether the vulnerability is exploitable in the current state; DORA Article 17 and FCA SUP 15 may require regulatory notification if this is already in production.'
+    hint: '<strong>Security vulnerability detected.</strong> Security defects are always Release Blockers. Additionally: notify your CISO and security team immediately; assess whether the vulnerability is exploitable in the current state; DORA Article 19 (reporting of major ICT-related incidents) and FCA SUP 15 may require regulatory notification if this is already in production.'
   }
 ];
 

@@ -1,9 +1,9 @@
 {
   "meta": {
-    "content_version": "2026-05-29",
+    "content_version": "2026-10-10",
     "schema_version": "1",
     "tool_version": "v1",
-    "changelog": "Initial content layer. Framework guidance validated against: ITIL 4 current edition (AXELOS/PeopleCert), DORA dora.dev 2024 State of DevOps, SAFe 6.0, EU DORA Regulation 2022/2554 (in force Jan 2025), FCA PS21/3 Operational Resilience, UK GDPR/ICO guidance. Review quarterly or when AXELOS, DORA, FCA or EBA publish material updates.",
+    "changelog": "2026-10-10: DORA citations corrected against Regulation (EU) 2022/2554 (Art. 9(4)(e) change management; Art. 9(4)(f) patches; Art. 19 incident reporting; removed incorrect Article 10 reference). Initial content layer. Framework guidance validated against: ITIL 4 current edition (AXELOS/PeopleCert), DORA dora.dev 2024 State of DevOps, SAFe 6.0, EU DORA Regulation 2022/2554 (in force Jan 2025), FCA PS21/3 Operational Resilience, UK GDPR/ICO guidance. Review quarterly or when AXELOS, DORA, FCA or EBA publish material updates.",
     "next_review": "2026-08-29",
     "maintainer": "Increment content_version to YYYY-MM-DD when updating. This file is fetched on page load to check for newer content than the baked-in version in the HTML.",
     "last_checked_at": "2026-09-28",
@@ -14,7 +14,7 @@
       "id": "dora_eu_jan2025",
       "type": "warn",
       "title": "EU DORA in force from January 2025",
-      "text": "ICT change management obligations under DORA Article 9 apply to in-scope EU financial entities. Change management processes — including release management gates and approvals — must meet the requirements of Articles 9 and 10. Verify your firm's obligations with your compliance team.",
+      "text": "ICT change management obligations under DORA Article 9(4)(e) apply to in-scope EU financial entities: all changes to ICT systems must be recorded, tested, assessed, approved, implemented and verified in a controlled manner, and the change management process must be approved by appropriate lines of management. Verify your firm's obligations with your compliance team.",
       "applies_to": [
         "all"
       ],
@@ -46,8 +46,8 @@
   ],
   "regulatory_references": {
     "dora_article_9": {
-      "title": "DORA Article 9 — ICT security policies, procedures, protocols and tools",
-      "summary": "Financial entities must implement ICT change management procedures. All changes to ICT systems must be subject to formal approval by authorised personnel prior to implementation, with adequate testing and post-implementation review.",
+      "title": "DORA Article 9 — Protection and prevention",
+      "summary": "Article 9(4)(e): financial entities must implement documented policies, procedures and controls for ICT change management so that all changes to ICT systems are recorded, tested, assessed, approved, implemented and verified in a controlled manner; the process must be approved by appropriate lines of management. Article 9(4)(f): documented policies for patches and updates.",
       "url": "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
       "validated": "2026-01-15"
     },
@@ -107,7 +107,7 @@
   "framework_updates": [
     {
       "framework": "EU DORA",
-      "update": "Regulation (EU) 2022/2554 in force from 17 January 2025. Article 9 change management obligations apply to all in-scope financial entities. ICT change management procedures must include formal approval by authorised personnel prior to implementation.",
+      "update": "Regulation (EU) 2022/2554 in force from 17 January 2025. Article 9(4)(e) change management obligations apply to all in-scope financial entities: changes to ICT systems must be recorded, tested, assessed, approved, implemented and verified in a controlled manner.",
       "url": "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
       "validated": "2026-05-29"
     },
