@@ -34,7 +34,7 @@ function inject(o){
   else if(o && typeof o==='object'){ for(const k of Object.keys(o)){ const v=o[k]; if(typeof v==='string' && TEXTKEYS.has(k)) o[k]=P; else if(v && typeof v==='object' && !ENUM_ARRAYS.has(k)) inject(v); } }
 }
 async function sha(text){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16); }
-function bodyText(win){ const c=win.document.body.cloneNode(true); c.querySelectorAll('script,style,iframe').forEach(e=>e.remove()); return c.innerHTML.replace(/\s+/g,' ').replace(/<span class="save-status[^"]*" id="saveStatus">[^<]*<\/span>/,'<save-status/>').replace(/\b(?=[a-z0-9]*\d)(?=[a-z0-9]*[a-z])[a-z0-9]{10,13}\b/g,'ID'); }   // random ids made by the page before the runner takes over are masked
+function bodyText(win){ const c=win.document.body.cloneNode(true); c.querySelectorAll('script,style,iframe').forEach(e=>e.remove()); const tc=c.querySelector('#toastContainer'); if(tc) tc.innerHTML=''; return c.innerHTML.replace(/\s+/g,' ').replace(/<span class="save-status[^"]*" id="saveStatus">[^<]*<\/span>/,'<save-status/>').replace(/\b(?=[a-z0-9]*\d)(?=[a-z0-9]*[a-z])[a-z0-9]{10,13}\b/g,'ID'); }   // random ids made by the page before the runner takes over are masked
 
 async function drive(win, doc){
   win.localStorage.clear();
