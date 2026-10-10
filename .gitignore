@@ -22,3 +22,6 @@ Desktop.ini
 *.swp
 *.bak
 *~
+
+# CI tooling dependencies
+ci/node_modules/
