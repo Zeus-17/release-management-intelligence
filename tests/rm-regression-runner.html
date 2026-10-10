@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RM Regression Runner</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:system-ui,sans-serif;margin:16px;max-width:900px;line-height:1.5}
+  #status{padding:8px 12px;border-radius:6px;background:#eee;font-weight:600}
+  .ok{background:#d1fae5!important}.bad{background:#fee2e2!important}
+  pre{background:#f6f6f6;padding:10px;overflow:auto;max-height:420px;font-size:12px}
+  iframe{width:1px;height:1px;border:0;position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<h1>RM Regression Runner</h1>
+<p>Drives the <strong>real</strong> deterministic functions of <code>rm-tool-v1.html</code> and records their exact outputs.
+Serve the repo root over HTTP (e.g. <code>python -m http.server 3031</code>) and open this page.
+Compares against <code>rm-baseline.json</code> when present. See <code>Step0-Source-Verification-Findings.md</code> and RM matrix section 29.</p>
+<div id="status">Loading tool…</div>
+<pre id="out"></pre>
+<iframe id="tool" src="../rm-tool-v1.html"></iframe>
+
+<script>
+/* ---------------------------------------------------------------
+   Fixtures. Each is run through the tool's own functions; the harness
+   never re-implements rule logic (so it cannot drift from the source).
+   IDs map to RM-Tool-Test-Matrix-v1.md section 29 (S1…S16) where relevant.
+---------------------------------------------------------------- */
+const RELEASE_FIXTURES = [
+  {id:'rel-payment',     name:'Payment gateway upgrade', notes:''},
+  {id:'rel-auth',        name:'SSO login rework', notes:''},
+  {id:'rel-db',          name:'Database schema migration', notes:''},
+  {id:'rel-emergency',   name:'Urgent hotfix rollout', notes:''},
+  {id:'rel-mobile',      name:'iOS app update', notes:''},
+  {id:'rel-gdpr',        name:'Personal data export', notes:''},
+  {id:'rel-thirdparty',  name:'Supplier API integration', notes:''},
+  {id:'rel-pilot',       name:'Canary rollout of new search', notes:''},
+  {id:'rel-decom',       name:'Retire legacy portal', notes:''},
+  {id:'rel-none',        name:'Quarterly housekeeping', notes:''},
+  {id:'rel-S1-payment+auth', name:'Payment login change', notes:''},              // S1 first-match-wins
+  {id:'rel-S2-4dm+payment',  name:'Payment platform release', notes:'', dms:['cloud','api','mobile','desktop']}, // S2
+  {id:'rel-S6-remove-cred',  name:'Docs tidy', notes:'Remove old test credential from docs'}, // S6
+  {id:'rel-redteam6-stripe', name:'Webhook update', notes:'Stripe webhook listener update'},   // red-team 6 (vendor, no keyword)
+  {id:'rel-notes-only',      name:'', notes:'checkout flow changes'},
+  {id:'rel-case',            name:'PAYMENT', notes:''},
+  {id:'rel-empty',           name:'', notes:''}
+];
+const DEFECT_FIXTURES = [
+  {id:'def-crash',       title:'Application crash on startup'},
+  {id:'def-payment',     title:'Card payment declined incorrectly'},
+  {id:'def-login',       title:'Users cannot login after reset'},
+  {id:'def-dataloss',    title:'Data loss when saving form'},
+  {id:'def-performance', title:'Search page is very slow'},
+  {id:'def-cosmetic',    title:'Typo in footer label'},
+  {id:'def-browser',     title:'Layout broken in Safari browser'},
+  {id:'def-security',    title:'XSS vulnerability in comments'},
+  {id:'def-none',        title:'Something unrelated happens here'},
+  {id:'def-S3-payment+crash', title:'Payment page crash'},                  // S3 order
+  {id:'def-S5-short',    title:'crash!!'},                                   // S5 <8 chars
+  {id:'def-S7-download', title:'Download button misaligned'}               // S7 substring 'down'
+];
+const SEV_SENTINEL = 'low', CLS_SENTINEL = 'known'; // pre-set values to expose overwrite side effect (S4)
+
+function gate(status, signed){ return {id:'g', status, signedBy: signed ? 'Someone' : ''}; }
+function buildGates(n, passed, signedAll){
+  return Array.from({length:n}, (_,i)=> gate(i<passed?'passed':'pending', signedAll && i<passed));
+}
+function buildEnvs(path, healthyCount){
+  const o = {}; path.forEach((e,i)=>{ o[e] = {health: i<healthyCount?'healthy':'unknown'}; }); return o;
+}
+const ENV_PATH = ['DEV','SIT','UAT','PRE-PROD','PROD'];
+
+function readinessGrid(){
+  const cases = [];
+  [0,2,4].forEach(gp=>{            // gates passed out of 4 → 0/50/100%
+    [0,1,2,3].forEach(b=>{          // open blocker defects
+      [0,3,5].forEach(h=>{          // healthy environments out of 5
+        [false,true].forEach(sg=>{  // sign-offs recorded on passed gates
+          cases.push({id:`ready-g${gp}-b${b}-h${h}-s${sg?1:0}`, gates:buildGates(4,gp,sg), blockers:b, envPath:ENV_PATH, envs:buildEnvs(ENV_PATH,h)});
+        });
+      });
+    });
+  });
+  // edge cases
+  cases.push({id:'ready-S10-nogates',  gates:[], blockers:0, envPath:ENV_PATH, envs:buildEnvs(ENV_PATH,5)});
+  cases.push({id:'ready-S11-emptyenvs',gates:buildGates(4,4,true), blockers:0, envPath:[], envs:{}});
+  cases.push({id:'ready-S12-envunknown',gates:buildGates(4,4,true), blockers:0, envPath:ENV_PATH, envs:buildEnvs(ENV_PATH,0)});
+  cases.push({id:'ready-waived',       gates:[gate('waived',false),gate('passed',true),gate('passed',true),gate('pending',false)], blockers:1, envPath:ENV_PATH, envs:buildEnvs(ENV_PATH,5)});
+  return cases;
+}
+
+const GATE_TYPES = ['emergency','pilot','feature','standard','major','minor','patch',undefined];
+
+function gateHintFixtures(){
+  const rel = (o)=>Object.assign({id:'REL-T', gates:[], environments:{}, deliveryModels:[]}, o);
+  return [
+    {id:'hint-gng-1blocker',  blockers:1, rel:rel({}), gate:{id:'gng', checklist:{entry:[],exit:[]}}},
+    {id:'hint-gng-0blocker',  blockers:0, rel:rel({}), gate:{id:'gng', checklist:{entry:[],exit:[]}}},
+    {id:'hint-deploy-mismatch', blockers:0, rel:rel({environments:{'PRE-PROD':{version:'2.0.0'},'PROD':{version:'1.9.0'}}}), gate:{id:'deploy', checklist:{entry:[],exit:[]}}},
+    {id:'hint-deploy-mobile',   blockers:0, rel:rel({deliveryModels:['mobile']}), gate:{id:'deploy', checklist:{entry:[],exit:[]}}},
+    {id:'hint-sit-criteria',    blockers:0, rel:rel({}), gate:{id:'sit', checklist:{entry:[],exit:[]}}}
+  ];
+}
+
+/* ---------------- runner ---------------- */
+function textOf(el){ return el ? el.textContent.replace(/\s+/g,' ').trim() : null; }
+
+async function runAll(){
+  const frame = document.getElementById('tool');
+  const win = frame.contentWindow, doc = frame.contentDocument;
+  const R = {meta:{}, release:{}, defect:{}, readiness:{}, bands:{}, gateSets:{}, gateHints:{}};
+
+  R.meta.toolFile = 'rm-tool-v1.html';
+  R.meta.releaseRuleCount = win.eval('RELEASE_AI_RULES.length');
+  R.meta.defectRuleCount  = win.eval('DEFECT_AI_RULES.length');
+  R.meta.contentBaked     = win.eval('BAKED_CONTENT_VERSION');
+
+  // --- release rules via the real DOM + runReleaseAI() ---
+  for(const f of RELEASE_FIXTURES){
+    doc.getElementById('rel-name').value  = f.name;
+    doc.getElementById('rel-notes').value = f.notes;
+    win.eval('STATE.selectedDMs = ' + JSON.stringify(f.dms||[]));
+    const hintBox = doc.getElementById('rel-ai-hint');
+    hintBox.className = 'ai-hint'; doc.getElementById('rel-ai-hint-text').innerHTML = '';
+    win.runReleaseAI();
+    const shown = hintBox.classList.contains('show');
+    R.release[f.id] = shown
+      ? {shown:true, cls: hintBox.className.replace(/\s+/g,' ').trim(), html: doc.getElementById('rel-ai-hint-text').innerHTML}
+      : {shown:false};
+  }
+  win.eval('STATE.selectedDMs = []');
+
+  // --- defect rules via real DOM + runDefectAI() ---
+  // The severity <select> is empty until the defect form opens; populate it the way the tool does.
+  win.populateSevDropdown();
+  for(const f of DEFECT_FIXTURES){
+    doc.getElementById('def-title').value = f.title;
+    doc.getElementById('def-sev').value   = SEV_SENTINEL;
+    doc.getElementById('def-class').value = CLS_SENTINEL;
+    const hintBox = doc.getElementById('def-ai-hint');
+    hintBox.className = 'ai-hint'; doc.getElementById('def-ai-hint-text').innerHTML = '';
+    win.runDefectAI();
+    const shown = hintBox.classList.contains('show');
+    R.defect[f.id] = {
+      shown, cls: shown ? hintBox.className.replace(/\s+/g,' ').trim() : null,
+      html: shown ? doc.getElementById('def-ai-hint-text').innerHTML : null,
+      sevAfter: doc.getElementById('def-sev').value, classAfter: doc.getElementById('def-class').value
+    };
+  }
+
+  // --- readiness via calculateReadiness() ---
+  const savedDefects = win.eval('JSON.stringify(STATE.defects)');
+  for(const c of readinessGrid()){
+    const defects = Array.from({length:c.blockers}, (_,i)=>({id:'d'+i, releaseId:'REL-T', classification:'blocker', severity:'critical', title:'x'}));
+    win.eval('STATE.defects = ' + JSON.stringify(defects));
+    const rel = {id:'REL-T', gates:c.gates, envPath:c.envPath, environments:c.envs};
+    const out = win.calculateReadiness(rel);
+    // JSON can't hold NaN: record as string so S11 (documented NaN) is baselined faithfully
+    R.readiness[c.id] = Object.fromEntries(Object.entries(out).map(([k,v])=>[k, Number.isNaN(v)?'NaN':v]));
+  }
+  win.eval('STATE.defects = ' + savedDefects);
+
+  for(const s of [0,49,50,74,75,100]) R.bands['score-'+s] = win.readinessColour(s);
+
+  // --- gate sets via getGatesForRelease() ---
+  for(const t of GATE_TYPES) R.gateSets[String(t)] = win.getGatesForRelease({type:t});
+
+  // --- gate readiness hints via getGateReadinessHint() ---
+  for(const h of gateHintFixtures()){
+    const defects = Array.from({length:h.blockers}, (_,i)=>({id:'d'+i, releaseId:'REL-T', classification:'blocker'}));
+    win.eval('STATE.defects = ' + JSON.stringify(defects));
+    R.gateHints[h.id] = win.getGateReadinessHint(h.rel, h.gate);
+  }
+  win.eval('STATE.defects = ' + savedDefects);
+
+  return R;
+}
+
+function diff(a, b, path=''){
+  const out = [];
+  if(typeof a !== typeof b || (a===null)!==(b===null)){ out.push({path, baseline:a, current:b}); return out; }
+  if(a && typeof a === 'object'){
+    for(const k of new Set([...Object.keys(a), ...Object.keys(b)])) out.push(...diff(a[k], b[k], path ? path+'.'+k : k));
+    return out;
+  }
+  if(a !== b) out.push({path, baseline:a, current:b});
+  return out;
+}
+
+async function main(){
+  const status = document.getElementById('status'), out = document.getElementById('out');
+  const frame = document.getElementById('tool');
+  await new Promise(r => frame.contentDocument && frame.contentDocument.readyState==='complete' ? r() : frame.addEventListener('load', r, {once:true}));
+  await new Promise(r => setTimeout(r, 800)); // let the tool's own init finish
+  try{
+    window.__RESULT__ = await runAll();
+    let base = null;
+    try{ const resp = await fetch('rm-baseline.json', {cache:'no-store'}); if(resp.ok) base = await resp.json(); }catch(e){}
+    if(!base){
+      window.__DIFF__ = null;
+      status.textContent = 'Recorded (no baseline file to compare). Fixtures: ' + Object.keys(window.__RESULT__.release).length + ' release, ' + Object.keys(window.__RESULT__.defect).length + ' defect, ' + Object.keys(window.__RESULT__.readiness).length + ' readiness.';
+      out.textContent = JSON.stringify(window.__RESULT__, null, 1).slice(0, 4000) + '\n… (full object at window.__RESULT__)';
+    } else {
+      window.__DIFF__ = diff(base, window.__RESULT__);
+      const n = window.__DIFF__.length;
+      status.className = n ? 'bad' : 'ok';
+      status.textContent = n ? ('DIFF: ' + n + ' difference(s) from baseline') : 'PASS: identical to baseline';
+      out.textContent = n ? JSON.stringify(window.__DIFF__, null, 1) : '';
+    }
+  }catch(err){
+    status.className = 'bad'; status.textContent = 'Runner error: ' + err.message; out.textContent = err.stack;
+    window.__ERROR__ = err.message;
+  }
+}
+main();
+</script>
+</body>
+</html>
