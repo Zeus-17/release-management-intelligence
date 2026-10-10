@@ -1,0 +1,761 @@
+{
+ "cases": [
+  {
+   "id": "readiness-all-resolved",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "passed",
+       "provenance": "user_confirmed"
+      },
+      "signedBy": {
+       "state": "resolved",
+       "value": "Alex",
+       "provenance": "user_confirmed"
+      }
+     },
+     {
+      "id": {
+       "state": "resolved",
+       "value": "gng",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "pending",
+       "provenance": "user_confirmed"
+      },
+      "signedBy": {
+       "state": "resolved",
+       "value": "",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "defects": [
+     {
+      "releaseId": {
+       "state": "resolved",
+       "value": "REL-1",
+       "provenance": "user_confirmed"
+      },
+      "classification": {
+       "state": "resolved",
+       "value": "blocker",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV",
+      "PROD"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": [
+     {
+      "env": {
+       "state": "resolved",
+       "value": "DEV",
+       "provenance": "user_confirmed"
+      },
+      "health": {
+       "state": "resolved",
+       "value": "healthy",
+       "provenance": "user_confirmed"
+      }
+     },
+     {
+      "env": {
+       "state": "resolved",
+       "value": "PROD",
+       "provenance": "user_confirmed"
+      },
+      "health": {
+       "state": "resolved",
+       "value": "unknown",
+       "provenance": "user_confirmed"
+      }
+     }
+    ]
+   },
+   "expect": {
+    "status": "ready",
+    "caveats": []
+   }
+  },
+  {
+   "id": "readiness-unresolved-conservative-fields",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "unresolved",
+       "reason": "unknown_to_user"
+      },
+      "signedBy": {
+       "state": "unresolved",
+       "reason": "not_yet_asked"
+      }
+     }
+    ],
+    "defects": [],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": [
+     {
+      "env": {
+       "state": "resolved",
+       "value": "DEV",
+       "provenance": "user_confirmed"
+      },
+      "health": {
+       "state": "unresolved",
+       "reason": "declined"
+      }
+     }
+    ]
+   },
+   "expect": {
+    "status": "ready",
+    "caveats": [
+     {
+      "code": "gate_status_treated_as_not_started",
+      "field": "gates[0].status"
+     },
+     {
+      "code": "signoff_treated_as_missing",
+      "field": "gates[0].signedBy"
+     },
+     {
+      "code": "env_health_treated_as_unknown",
+      "field": "environments[0].health"
+     }
+    ],
+    "engine_input_contains": {
+     "gates[0].status": "not-started",
+     "environments[0].health": "unknown"
+    }
+   }
+  },
+  {
+   "id": "readiness-unresolved-defect-classification-blocks",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "passed",
+       "provenance": "user_confirmed"
+      },
+      "signedBy": {
+       "state": "resolved",
+       "value": "Alex",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "defects": [
+     {
+      "releaseId": {
+       "state": "resolved",
+       "value": "REL-1",
+       "provenance": "user_confirmed"
+      },
+      "classification": {
+       "state": "unresolved",
+       "reason": "unknown_to_user"
+      }
+     }
+    ],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": [
+     {
+      "env": {
+       "state": "resolved",
+       "value": "DEV",
+       "provenance": "user_confirmed"
+      },
+      "health": {
+       "state": "resolved",
+       "value": "healthy",
+       "provenance": "user_confirmed"
+      }
+     }
+    ]
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "defects[0].classification",
+      "reason_code": "defect_classification_unknown"
+     }
+    ]
+   }
+  },
+  {
+   "id": "readiness-no-gates-blocks",
+   "engine": "readiness",
+   "draft": {
+    "gates": {
+     "state": "unresolved",
+     "reason": "not_yet_asked"
+    },
+    "defects": [],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": []
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "gates",
+      "reason_code": "gates_missing"
+     }
+    ]
+   }
+  },
+  {
+   "id": "readiness-empty-env-path-blocks",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "passed",
+       "provenance": "user_confirmed"
+      },
+      "signedBy": {
+       "state": "resolved",
+       "value": "Alex",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "defects": [],
+    "envPath": {
+     "state": "unresolved",
+     "reason": "declined"
+    },
+    "environments": []
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "envPath",
+      "reason_code": "env_path_missing"
+     }
+    ]
+   }
+  },
+  {
+   "id": "readiness-model-inferred-provenance-rejected",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "passed",
+       "provenance": "model_inferred"
+      },
+      "signedBy": {
+       "state": "resolved",
+       "value": "Alex",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "defects": [],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": []
+   },
+   "expect": {
+    "status": "rejected"
+   }
+  },
+  {
+   "id": "readiness-field-absent-rejected",
+   "engine": "readiness",
+   "draft": {
+    "gates": [
+     {
+      "id": {
+       "state": "resolved",
+       "value": "dev-complete",
+       "provenance": "user_confirmed"
+      },
+      "status": {
+       "state": "resolved",
+       "value": "passed",
+       "provenance": "user_confirmed"
+      }
+     }
+    ],
+    "defects": [],
+    "envPath": {
+     "state": "resolved",
+     "value": [
+      "DEV"
+     ],
+     "provenance": "user_confirmed"
+    },
+    "environments": []
+   },
+   "expect": {
+    "status": "rejected"
+   }
+  },
+  {
+   "id": "release-hint-notes-unresolved-caveat",
+   "engine": "release_hint",
+   "draft": {
+    "name": {
+     "state": "resolved",
+     "value": "Payment gateway upgrade",
+     "provenance": "user_confirmed"
+    },
+    "notes": {
+     "state": "unresolved",
+     "reason": "declined"
+    },
+    "deliveryModels": {
+     "state": "resolved",
+     "value": [],
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "ready",
+    "caveats": [
+     {
+      "code": "assessed_on_name_only",
+      "field": "notes"
+     }
+    ]
+   }
+  },
+  {
+   "id": "release-hint-name-unresolved-not-assessed",
+   "engine": "release_hint",
+   "draft": {
+    "name": {
+     "state": "unresolved",
+     "reason": "not_yet_asked"
+    },
+    "notes": {
+     "state": "resolved",
+     "value": "Stripe webhook listener update",
+     "provenance": "user_confirmed"
+    },
+    "deliveryModels": {
+     "state": "resolved",
+     "value": [],
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "not_assessed",
+    "missing": [
+     {
+      "field": "name",
+      "reason_code": "release_name_missing"
+     }
+    ]
+   }
+  },
+  {
+   "id": "release-hint-unknown-delivery-model-rejected",
+   "engine": "release_hint",
+   "draft": {
+    "name": {
+     "state": "resolved",
+     "value": "x",
+     "provenance": "user_confirmed"
+    },
+    "notes": {
+     "state": "resolved",
+     "value": "",
+     "provenance": "user_confirmed"
+    },
+    "deliveryModels": {
+     "state": "resolved",
+     "value": [
+      "quantum"
+     ],
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "rejected"
+   }
+  },
+  {
+   "id": "defect-hint-short-title-not-assessed",
+   "engine": "defect_hint",
+   "draft": {
+    "title": {
+     "state": "resolved",
+     "value": "crash!!",
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "not_assessed",
+    "missing": [
+     {
+      "field": "title",
+      "reason_code": "title_too_short"
+     }
+    ]
+   }
+  },
+  {
+   "id": "defect-hint-title-unresolved-not-assessed",
+   "engine": "defect_hint",
+   "draft": {
+    "title": {
+     "state": "unresolved",
+     "reason": "not_yet_asked"
+    }
+   },
+   "expect": {
+    "status": "not_assessed",
+    "missing": [
+     {
+      "field": "title",
+      "reason_code": "defect_title_missing"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gate-hint-blocker-count-unresolved-blocks",
+   "engine": "gate_hint",
+   "draft": {
+    "gateId": {
+     "state": "resolved",
+     "value": "gng",
+     "provenance": "user_confirmed"
+    },
+    "entryConfirmed": {
+     "state": "resolved",
+     "value": 2,
+     "provenance": "user_confirmed"
+    },
+    "exitConfirmed": {
+     "state": "resolved",
+     "value": 1,
+     "provenance": "user_confirmed"
+    },
+    "blockerCount": {
+     "state": "unresolved",
+     "reason": "unknown_to_user"
+    },
+    "preProdVersion": {
+     "state": "resolved",
+     "value": "2.0.0",
+     "provenance": "user_confirmed"
+    },
+    "prodVersion": {
+     "state": "resolved",
+     "value": "1.9.0",
+     "provenance": "user_confirmed"
+    },
+    "deliveryModels": {
+     "state": "resolved",
+     "value": [],
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "blockerCount",
+      "reason_code": "blocker_count_unknown"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gate-hint-versions-unresolved-caveats",
+   "engine": "gate_hint",
+   "draft": {
+    "gateId": {
+     "state": "resolved",
+     "value": "deploy",
+     "provenance": "user_confirmed"
+    },
+    "entryConfirmed": {
+     "state": "resolved",
+     "value": 4,
+     "provenance": "user_confirmed"
+    },
+    "exitConfirmed": {
+     "state": "resolved",
+     "value": 5,
+     "provenance": "user_confirmed"
+    },
+    "blockerCount": {
+     "state": "resolved",
+     "value": 0,
+     "provenance": "user_confirmed"
+    },
+    "preProdVersion": {
+     "state": "unresolved",
+     "reason": "unknown_to_user"
+    },
+    "prodVersion": {
+     "state": "unresolved",
+     "reason": "unknown_to_user"
+    },
+    "deliveryModels": {
+     "state": "resolved",
+     "value": [
+      "mobile"
+     ],
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "ready",
+    "caveats": [
+     {
+      "code": "version_mismatch_check_skipped",
+      "field": "preProdVersion"
+     },
+     {
+      "code": "version_mismatch_check_skipped",
+      "field": "prodVersion"
+     }
+    ]
+   }
+  },
+  {
+   "id": "risk-score-likelihood-unresolved-blocks",
+   "engine": "risk_score",
+   "draft": {
+    "likelihood": {
+     "state": "unresolved",
+     "reason": "unknown_to_user"
+    },
+    "impact": {
+     "state": "resolved",
+     "value": 4,
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "likelihood",
+      "reason_code": "risk_likelihood_unknown"
+     }
+    ]
+   }
+  },
+  {
+   "id": "risk-score-out-of-range-rejected",
+   "engine": "risk_score",
+   "draft": {
+    "likelihood": {
+     "state": "resolved",
+     "value": 6,
+     "provenance": "user_confirmed"
+    },
+    "impact": {
+     "state": "resolved",
+     "value": 4,
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "rejected"
+   }
+  },
+  {
+   "id": "decision-record-decision-unresolved-blocks",
+   "engine": "decision_record",
+   "draft": {
+    "decision": {
+     "state": "unresolved",
+     "reason": "not_yet_asked"
+    },
+    "decidedBy": {
+     "state": "resolved",
+     "value": "A. Manager",
+     "provenance": "user_confirmed"
+    },
+    "rationale": {
+     "state": "resolved",
+     "value": "",
+     "provenance": "user_confirmed"
+    },
+    "riskNotes": {
+     "state": "resolved",
+     "value": "",
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "cannot_be_determined",
+    "missing": [
+     {
+      "field": "decision",
+      "reason_code": "decision_not_made"
+     }
+    ]
+   }
+  },
+  {
+   "id": "decision-record-agent-supplied-decision-rejected",
+   "engine": "decision_record",
+   "agent_supplied": [
+    "decision"
+   ],
+   "draft": {
+    "decision": {
+     "state": "resolved",
+     "value": "go",
+     "provenance": "form"
+    },
+    "decidedBy": {
+     "state": "resolved",
+     "value": "A. Manager",
+     "provenance": "user_confirmed"
+    },
+    "rationale": {
+     "state": "resolved",
+     "value": "",
+     "provenance": "user_confirmed"
+    },
+    "riskNotes": {
+     "state": "resolved",
+     "value": "",
+     "provenance": "user_confirmed"
+    }
+   },
+   "expect": {
+    "status": "rejected",
+    "reason": "agent_may_not_write:decision"
+   }
+  }
+ ],
+ "enums": {
+  "RELEASE_TYPE": [
+   "major",
+   "minor",
+   "patch",
+   "emergency",
+   "pilot",
+   "feature"
+  ],
+  "DEFECT_CLASS": [
+   "blocker",
+   "deferred",
+   "known",
+   "wontfix"
+  ],
+  "DELIVERY_MODEL": [
+   "cloud",
+   "api",
+   "mobile",
+   "desktop",
+   "legacy",
+   "di2",
+   "cwa",
+   "pilot"
+  ],
+  "GATE_ID": [
+   "dev-complete",
+   "code-review",
+   "sit",
+   "uat",
+   "preprod",
+   "gng",
+   "deploy",
+   "hypercare"
+  ],
+  "GATE_STATUS": [
+   "not-started",
+   "pending",
+   "in-progress",
+   "passed",
+   "failed",
+   "waived"
+  ],
+  "ENV": [
+   "DEV",
+   "SIT",
+   "UAT",
+   "PRE-PROD",
+   "PROD"
+  ],
+  "ENV_HEALTH": [
+   "unknown",
+   "healthy",
+   "warning",
+   "blocked"
+  ]
+ }
+}

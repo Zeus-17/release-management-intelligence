@@ -1,0 +1,261 @@
+{
+ "$id": "urn:zeus17:rm:unresolved-policy:v1",
+ "description": "For every leaf input of every engine: what happens when the input arrives as 'unresolved'. 'block' = no verdict can be produced (UI shows the distinct 'cannot be determined' state). 'fallback' = a named, conservative value is substituted AND a caveat is attached to the result. Model-inferred values are never an allowed provenance.",
+ "engines": {
+  "release_hint": {
+   "doc": "runReleaseAI() - 9 keyword rules (first match wins) preceded by the >=4 delivery-model complexity check.",
+   "inputs": {
+    "name": {
+     "on_unresolved": "block",
+     "reason_code": "release_name_missing",
+     "block_status": "not_assessed",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Without a name there is nothing to scan; 'no hint' would read as 'checked and clear'."
+    },
+    "notes": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "assessed_on_name_only",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Standard form treats blank notes as '' and scans name only. Allowed ONLY with a mandatory caveat so the user knows notes were not scanned."
+    },
+    "deliveryModels": {
+     "on_unresolved": "fallback",
+     "fallback_value": [],
+     "caveat_code": "delivery_models_not_considered",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Blank selection is the form default, but the >=4 delivery-model complexity check would be silently skipped - caveat is mandatory."
+    }
+   }
+  },
+  "defect_hint": {
+   "doc": "runDefectAI() - 8 keyword rules over the defect title (first match wins). In the standard form it also overwrites the severity and classification fields; in the agent path those are shown as SUGGESTIONS only.",
+   "inputs": {
+    "title": {
+     "on_unresolved": "block",
+     "reason_code": "defect_title_missing",
+     "block_status": "not_assessed",
+     "agent_writable": "yes",
+     "on_invalid": "not_assessed",
+     "rationale": "Engine shows nothing without a title; that must not read as 'no issue found'.",
+     "invalid_reason_code": "title_too_short"
+    }
+   }
+  },
+  "readiness": {
+   "doc": "calculateReadiness() - score = gates*0.40 + defects*0.30 + envs*0.20 + signoffs*0.10 (rounded). No Go/No-Go threshold exists; colour bands (75/50) are display only.",
+   "inputs": {
+    "gates[].id": {
+     "on_unresolved": "block",
+     "reason_code": "gate_identity_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Cannot place a gate in the gate set."
+    },
+    "gates[].status": {
+     "on_unresolved": "fallback",
+     "fallback_value": "not-started",
+     "caveat_code": "gate_status_treated_as_not_started",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: only passed/waived add to the score, and 'not-started' is the form default at gate creation."
+    },
+    "gates[].signedBy": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "signoff_treated_as_missing",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: a blank sign-off lowers the sign-off component, matching the form default."
+    },
+    "gates": {
+     "on_unresolved": "block",
+     "reason_code": "gates_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "block_as_missing",
+     "rationale": "Legacy engine returns 50/100 for a release with zero gates (defects+environments still score) and 0/0 sign-offs - an artefact, not a verdict. The agent path refuses to produce it."
+    },
+    "defects": {
+     "on_unresolved": "block",
+     "reason_code": "defect_list_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "If the defect list is unknown the 30% defect component cannot be computed; defaulting to 'no defects' would score a possibly-blocked release as clear."
+    },
+    "defects[].releaseId": {
+     "on_unresolved": "block",
+     "reason_code": "defect_release_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "A defect that cannot be attributed to a release cannot be included or excluded safely."
+    },
+    "defects[].classification": {
+     "on_unresolved": "block",
+     "reason_code": "defect_classification_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "NOT conservative to default: an unresolved defect defaulted to non-blocker could hide a release blocker (30% of the score). Hard block."
+    },
+    "envPath": {
+     "on_unresolved": "block",
+     "reason_code": "env_path_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "block_as_missing",
+     "rationale": "Legacy engine divides by envPath.length: an empty path yields NaN. The agent path refuses to produce it."
+    },
+    "environments": {
+     "on_unresolved": "fallback",
+     "fallback_value": [],
+     "caveat_code": "environments_treated_as_unknown",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: an environment with no health reading scores exactly like 'unknown' (not healthy)."
+    },
+    "environments[].env": {
+     "on_unresolved": "block",
+     "reason_code": "environment_identity_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Cannot place a health reading in the path."
+    },
+    "environments[].health": {
+     "on_unresolved": "fallback",
+     "fallback_value": "unknown",
+     "caveat_code": "env_health_treated_as_unknown",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: 'unknown' is the form default and scores as not healthy, exactly like warning/blocked."
+    }
+   }
+  },
+  "gate_hint": {
+   "doc": "getGateReadinessHint() - up to 5 conditional hints per gate.",
+   "inputs": {
+    "gateId": {
+     "on_unresolved": "block",
+     "reason_code": "gate_identity_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Hints depend on which gate this is."
+    },
+    "entryConfirmed": {
+     "on_unresolved": "fallback",
+     "fallback_value": 0,
+     "caveat_code": "entry_criteria_treated_as_unconfirmed",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative: the hint then says criteria are not yet confirmed, which prompts the user to check."
+    },
+    "exitConfirmed": {
+     "on_unresolved": "fallback",
+     "fallback_value": 0,
+     "caveat_code": "exit_criteria_treated_as_unconfirmed",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Conservative, as above."
+    },
+    "blockerCount": {
+     "on_unresolved": "block",
+     "reason_code": "blocker_count_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "The Go/No-Go blocker hint depends on it, and a defaulted 0 would suppress a warning."
+    },
+    "preProdVersion": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "version_mismatch_check_skipped",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Hint is skipped (not asserted either way); caveat tells the user the comparison was not made."
+    },
+    "prodVersion": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "version_mismatch_check_skipped",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "As above."
+    },
+    "deliveryModels": {
+     "on_unresolved": "fallback",
+     "fallback_value": [],
+     "caveat_code": "mobile_check_skipped",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Mobile store-approval hint skipped; caveat required."
+    }
+   }
+  },
+  "risk_score": {
+   "doc": "Risk score = likelihood x impact. High >= 15, medium >= 8, otherwise low. Open risks scoring >= 15 are counted in Go/No-Go wizard step 4.",
+   "inputs": {
+    "likelihood": {
+     "on_unresolved": "block",
+     "reason_code": "risk_likelihood_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "No neutral value exists; any default would invent a score."
+    },
+    "impact": {
+     "on_unresolved": "block",
+     "reason_code": "risk_impact_unknown",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "No neutral value exists; any default would invent a score."
+    }
+   }
+  },
+  "decision_record": {
+   "doc": "recordGNGDecision() - RECORDS a human GO / NO-GO. It computes nothing. The agent layer may never supply or imply 'decision' (Constraints doc Sections 2-3, 8).",
+   "inputs": {
+    "decision": {
+     "on_unresolved": "block",
+     "reason_code": "decision_not_made",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "no",
+     "on_invalid": "reject",
+     "rationale": "The GO / NO-GO is a human decision. The agent can never supply it, only present the evidence."
+    },
+    "decidedBy": {
+     "on_unresolved": "block",
+     "reason_code": "decider_missing",
+     "block_status": "cannot_be_determined",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "A recorded decision without an accountable person is not valid."
+    },
+    "rationale": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "no_rationale_given",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Optional narrative; blank is allowed by the standard form."
+    },
+    "riskNotes": {
+     "on_unresolved": "fallback",
+     "fallback_value": "",
+     "caveat_code": "no_risk_notes_given",
+     "agent_writable": "yes",
+     "on_invalid": "reject",
+     "rationale": "Optional narrative; blank is allowed by the standard form."
+    }
+   }
+  }
+ }
+}

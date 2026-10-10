@@ -1,0 +1,972 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "urn:zeus17:rm:agent-drafts:v1",
+ "title": "RM agent drafts (every leaf explicitly resolved or unresolved)",
+ "$defs": {
+  "Provenance": {
+   "enum": [
+    "form",
+    "user_confirmed"
+   ]
+  },
+  "UnresolvedReason": {
+   "enum": [
+    "declined",
+    "unknown_to_user",
+    "not_yet_asked"
+   ]
+  },
+  "Unresolved": {
+   "type": "object",
+   "required": [
+    "state",
+    "reason"
+   ],
+   "properties": {
+    "state": {
+     "const": "unresolved"
+    },
+    "reason": {
+     "$ref": "#/$defs/UnresolvedReason"
+    }
+   },
+   "additionalProperties": false
+  },
+  "Caveat": {
+   "type": "object",
+   "required": [
+    "code",
+    "field"
+   ],
+   "properties": {
+    "code": {
+     "type": "string",
+     "minLength": 1
+    },
+    "field": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "MissingInput": {
+   "type": "object",
+   "required": [
+    "field",
+    "reason_code"
+   ],
+   "properties": {
+    "field": {
+     "type": "string",
+     "minLength": 1
+    },
+    "reason_code": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "release_hint": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string",
+         "minLength": 1
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ],
+     "description": "Release name (the text the keyword rules scan, with notes)."
+    },
+    "notes": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ],
+     "description": "Release notes text. May be an empty string if the user confirmed there are none."
+    },
+    "deliveryModels": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "array",
+         "uniqueItems": true,
+         "items": {
+          "enum": [
+           "cloud",
+           "api",
+           "mobile",
+           "desktop",
+           "legacy",
+           "di2",
+           "cwa",
+           "pilot"
+          ]
+         }
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ],
+     "description": "4 or more delivery models trigger the complexity hint before any keyword rule."
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "notes",
+    "deliveryModels"
+   ]
+  },
+  "defect_hint": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ],
+     "description": "Defect title. The engine shows nothing for titles shorter than 8 characters."
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "title"
+   ]
+  },
+  "readiness": {
+   "type": "object",
+   "properties": {
+    "gates": {
+     "oneOf": [
+      {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "id": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "dev-complete",
+               "code-review",
+               "sit",
+               "uat",
+               "preprod",
+               "gng",
+               "deploy",
+               "hypercare"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         },
+         "status": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "not-started",
+               "pending",
+               "in-progress",
+               "passed",
+               "failed",
+               "waived"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         },
+         "signedBy": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "type": "string"
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         }
+        },
+        "additionalProperties": false,
+        "required": [
+         "id",
+         "status",
+         "signedBy"
+        ]
+       }
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "defects": {
+     "oneOf": [
+      {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "releaseId": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "type": "string",
+              "minLength": 1
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         },
+         "classification": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "blocker",
+               "deferred",
+               "known",
+               "wontfix"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         }
+        },
+        "additionalProperties": false,
+        "required": [
+         "releaseId",
+         "classification"
+        ]
+       }
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ],
+     "description": "Defects for THIS release. Only classification === 'blocker' counts; defect status is ignored by the engine."
+    },
+    "envPath": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "array",
+         "uniqueItems": true,
+         "items": {
+          "enum": [
+           "DEV",
+           "SIT",
+           "UAT",
+           "PRE-PROD",
+           "PROD"
+          ]
+         }
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "environments": {
+     "oneOf": [
+      {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "env": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "DEV",
+               "SIT",
+               "UAT",
+               "PRE-PROD",
+               "PROD"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         },
+         "health": {
+          "oneOf": [
+           {
+            "type": "object",
+            "required": [
+             "state",
+             "value",
+             "provenance"
+            ],
+            "properties": {
+             "state": {
+              "const": "resolved"
+             },
+             "value": {
+              "enum": [
+               "unknown",
+               "healthy",
+               "warning",
+               "blocked"
+              ]
+             },
+             "provenance": {
+              "$ref": "#/$defs/Provenance"
+             }
+            },
+            "additionalProperties": false
+           },
+           {
+            "$ref": "#/$defs/Unresolved"
+           }
+          ]
+         }
+        },
+        "additionalProperties": false,
+        "required": [
+         "env",
+         "health"
+        ]
+       }
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "gates",
+    "defects",
+    "envPath",
+    "environments"
+   ]
+  },
+  "gate_hint": {
+   "type": "object",
+   "properties": {
+    "gateId": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "enum": [
+          "dev-complete",
+          "code-review",
+          "sit",
+          "uat",
+          "preprod",
+          "gng",
+          "deploy",
+          "hypercare"
+         ]
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "entryConfirmed": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "exitConfirmed": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "blockerCount": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "preProdVersion": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "prodVersion": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "deliveryModels": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "array",
+         "uniqueItems": true,
+         "items": {
+          "enum": [
+           "cloud",
+           "api",
+           "mobile",
+           "desktop",
+           "legacy",
+           "di2",
+           "cwa",
+           "pilot"
+          ]
+         }
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "gateId",
+    "entryConfirmed",
+    "exitConfirmed",
+    "blockerCount",
+    "preProdVersion",
+    "prodVersion",
+    "deliveryModels"
+   ]
+  },
+  "risk_score": {
+   "type": "object",
+   "properties": {
+    "likelihood": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "integer",
+         "minimum": 1,
+         "maximum": 5
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "impact": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "integer",
+         "minimum": 1,
+         "maximum": 5
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "likelihood",
+    "impact"
+   ]
+  },
+  "decision_record": {
+   "type": "object",
+   "properties": {
+    "decision": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "enum": [
+          "go",
+          "nogo"
+         ]
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "decidedBy": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string",
+         "minLength": 1
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "rationale": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    },
+    "riskNotes": {
+     "oneOf": [
+      {
+       "type": "object",
+       "required": [
+        "state",
+        "value",
+        "provenance"
+       ],
+       "properties": {
+        "state": {
+         "const": "resolved"
+        },
+        "value": {
+         "type": "string"
+        },
+        "provenance": {
+         "$ref": "#/$defs/Provenance"
+        }
+       },
+       "additionalProperties": false
+      },
+      {
+       "$ref": "#/$defs/Unresolved"
+      }
+     ]
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "decision",
+    "decidedBy",
+    "rationale",
+    "riskNotes"
+   ]
+  }
+ }
+}
