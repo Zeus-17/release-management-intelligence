@@ -1,0 +1,51 @@
+{
+ "status": "PROPOSED - not applied to the tool. Set A = precision only (word boundaries + context guards). Set B = A + extra vocabulary.",
+ "caution": "Authored by the same hand as the corpus; the measured gain is optimistic. Needs practitioner review before any change.",
+ "flags": "i",
+ "release_hint": {
+  "A": {
+   "0": "\\b(payments?|checkouts?|billing|invoices?|transactions?|pci|finance|banking|fx|trading|settlements?)\\b",
+   "1": "\\b(auth|authn|authz|authenticat\\w*|authoris\\w*|authoriz\\w*|oauth2?|logins?|sso|saml|identity|passwords?|credentials?|2fa|mfa|ldap|active directory)\\b",
+   "2": "\\b(databases?|schemas?|migrations?|db|sql|postgres(ql)?|mysql|oracle|mongo(db)?|elasticsearch|data model|indexes|indexing|reindex(ing)?)\\b|\\b(add|create|drop|rebuild|new)\\s+(an\\s+)?index\\b",
+   "3": "\\b(emergency|urgent|p1|critical fix|hotfix|hot-fix|sev1|severity 1|major incident)\\b",
+   "4": "\\b(mobile|ios|android|app stores?|google play|testflight)\\b",
+   "5": "\\b(gdpr|personal data|pii|data subjects?|ico|privacy|data protection|dpa)\\b",
+   "6": "\\b(third[ -]?party|suppliers?|vendors?|api integrations?|external services?|saas|partner apis?)\\b",
+   "7": "\\b(pilots?|beta|canary|feature flags?|dark launch|a/b|limited release|preview (release|build|programme|program|channel))\\b",
+   "8": "\\b(decommission\\w*|deprecat\\w*|sunset\\w*|end of life|eol|retire\\w*)\\b|\\bturn(ed|ing)? off (the |old |legacy )*(\\w+ )?(service|server|system|portal|platform)\\b"
+  },
+  "B": {
+   "0": "\\b(payments?|checkouts?|billing|invoices?|transactions?|pci|finance|banking|fx|trading|settlements?|stripe|paypal|adyen|worldpay|klarna|bacs|chaps|sepa|apple pay|google pay|refunds?|payouts?|direct debits?|wire transfers?|card payments?|merchants?)\\b",
+   "1": "\\b(auth|authn|authz|authenticat\\w*|authoris\\w*|authoriz\\w*|oauth2?|logins?|sso|saml|identity|passwords?|credentials?|2fa|mfa|ldap|active directory|okta|single sign-on|sign-?in|passkeys?|biometric|authenticator|openid|oidc|kerberos)\\b",
+   "2": "\\b(databases?|schemas?|migrations?|db|sql|postgres(ql)?|mysql|oracle|mongo(db)?|elasticsearch|data model|indexes|indexing|reindex(ing)?)\\b|\\b(add|create|drop|rebuild|new)\\s+(an\\s+)?index\\b|\\b(alter table|backfill|stored procedures?|replication)\\b",
+   "3": "\\b(emergency|urgent|p1|critical fix|hotfix|hot-fix|sev1|severity 1|major incident|out[ -]of[ -]band|sev ?1)\\b",
+   "4": "\\b(mobile|ios|android|app stores?|google play|testflight|iphone|ipad|apk)\\b",
+   "5": "\\b(gdpr|personal data|pii|data subjects?|ico|privacy|data protection|dpa|dpia|subject access requests?|consent|date[ -]of[ -]birth|address book|email addresses|special category)\\b",
+   "6": "\\b(third[ -]?party|suppliers?|vendors?|api integrations?|external services?|saas|partner apis?)\\b",
+   "7": "\\b(pilots?|beta|canary|feature flags?|dark launch|a/b|limited release|preview (release|build|programme|program|channel))\\b",
+   "8": "\\b(decommission\\w*|deprecat\\w*|sunset\\w*|end of life|eol|retire\\w*)\\b|\\bturn(ed|ing)? off (the |old |legacy )*(\\w+ )?(service|server|system|portal|platform)\\b"
+  }
+ },
+ "defect_hint": {
+  "A": {
+   "0": "\\b(crash\\w*|null pointer|npe|unhandled exception|fatal|outage|unavailable|down|not responding)\\b|\\b(http|status|error|code)\\s?500\\b|\\b500 (error|internal)",
+   "1": "\\b(payments?|transactions?|billing|checkouts?|cards?|pci|fraud|financial|money|funds?|refunds?)\\b|\\b(bank|money|fund|wire|account)\\s+transfers?\\b|\\btransfers? (of )?(funds|money)\\b",
+   "2": "\\b(logins?|log in|auth|authn|authz|authenticat\\w*|authoris\\w*|authoriz\\w*|sign[ -]?in|passwords?|sso|tokens?|sessions?|locked out|cannot access|can't access)\\b|(^|[^£$€\\d.])40[13]\\b",
+   "3": "\\b(data loss|corrupt\\w*|overwrit\\w*|missing records?|wrong data|data integrity|incorrect calculations?)\\b|\\bdeleted (after|during|by|without|unexpectedly)\\b|\\b(were|was|got|been|accidentally|unexpectedly|silently) deleted\\b",
+   "4": "\\b(performance|slow|slowness|slowly|time-?outs?|latency|response times?|page loads?|memory leaks?|cpu|high load)\\b",
+   "5": "\\b(cosmetic|typos?|spelling|colou?rs?|fonts?|margins?|padding|alignment|misaligned|icons?|label text)\\b",
+   "6": "\\b(mobile|ios|android|safari|chrome|firefox|browsers?|responsive|tablets?|iphone|ipad)\\b|\\b(microsoft edge|ms edge|edge browser|in edge|on edge|edge (shows|renders|displays|fails|crashes|only))\\b",
+   "7": "\\b(security|vulnerabilit(y|ies)|cve|xss|csrf|exploit(s|ed|able)?|exposed|exposure of)\\b|\\b(sql|command|code|html|script|ldap) injection\\b|\\b(data|security|privacy|account|credential)s? breach(es)?\\b|\\bbreach of (data|security|privacy)\\b"
+  },
+  "B": {
+   "0": "\\b(crash\\w*|null pointer|npe|unhandled exception|fatal|outage|unavailable|down|not responding)\\b|\\b(http|status|error|code)\\s?500\\b|\\b500 (error|internal)|\\b(falls? over|white screen|blank screen|hangs?|freez\\w+)\\b",
+   "1": "\\b(payments?|transactions?|billing|checkouts?|cards?|pci|fraud|financial|money|funds?|refunds?)\\b|\\b(bank|money|fund|wire|account)\\s+transfers?\\b|\\btransfers? (of )?(funds|money)\\b|\\b(direct debits?|standing orders?|chargebacks?|iban|sort code|wallet|balance|purchases?|double-charged|overcharged)\\b",
+   "2": "\\b(logins?|log in|auth|authn|authz|authenticat\\w*|authoris\\w*|authoriz\\w*|sign[ -]?in|passwords?|sso|tokens?|sessions?|locked out|cannot access|can't access)\\b|(^|[^£$€\\d.])40[13]\\b|\\b(credentials?|okta|2fa|mfa|account locked|locked account)\\b",
+   "3": "\\b(data loss|corrupt\\w*|overwrit\\w*|missing records?|wrong data|data integrity|incorrect calculations?)\\b|\\bdeleted (after|during|by|without|unexpectedly)\\b|\\b(were|was|got|been|accidentally|unexpectedly|silently) deleted\\b|\\b(duplicate (rows|records)|lost (data|records)|records? (lost|missing))\\b",
+   "4": "\\b(performance|slow|slowness|slowly|time-?outs?|latency|response times?|page loads?|memory leaks?|cpu|high load|lag\\w*|sluggish)\\b",
+   "5": "\\b(cosmetic|typos?|spelling|colou?rs?|fonts?|margins?|padding|alignment|misaligned|icons?|label text|truncated|overlapping|inconsistent)\\b",
+   "6": "\\b(mobile|ios|android|safari|chrome|firefox|browsers?|responsive|tablets?|iphone|ipad)\\b|\\b(microsoft edge|ms edge|edge browser|in edge|on edge|edge (shows|renders|displays|fails|crashes|only))\\b",
+   "7": "\\b(security|vulnerabilit(y|ies)|cve|xss|csrf|exploit(s|ed|able)?|exposed|exposure of)\\b|\\b(sql|command|code|html|script|ldap) injection\\b|\\b(data|security|privacy|account|credential)s? breach(es)?\\b|\\bbreach of (data|security|privacy)\\b|\\b(hard-?coded (secrets?|passwords?|keys?|credentials?)|open (s3 )?bucket|leaked? (keys?|secrets?|passwords?))\\b"
+  }
+ }
+}

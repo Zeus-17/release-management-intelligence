@@ -1,0 +1,631 @@
+{
+ "engine": "defect_hint",
+ "tool": "rm",
+ "concepts": [
+  "crash / outage / unavailable",
+  "payment / financial impact",
+  "authentication / access",
+  "data loss / integrity",
+  "performance",
+  "cosmetic",
+  "browser / device specific",
+  "security vulnerability"
+ ],
+ "labelling": "By intent, authored without consulting the regex results; Claude's judgement, for human review. Concept index == rule index in the tool's table.",
+ "cases": [
+  {
+   "t": "Application crash on startup",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Null pointer exception in order service",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "NPE when saving profile",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "HTTP 500 on search results",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Fatal error loading dashboard",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Site outage in EU region",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Service unavailable after deploy",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "API is down for all tenants",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "App not responding after login",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Server falls over under load",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Blank white screen on launch",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Download button misaligned",
+   "c": [
+    5
+   ],
+   "note": "down in download; cosmetic"
+  },
+  {
+   "t": "Countdown timer shows wrong colour",
+   "c": [
+    5
+   ],
+   "note": "down in countdown; cosmetic"
+  },
+  {
+   "t": "Markdown preview strips tables",
+   "c": [],
+   "note": "down in markdown"
+  },
+  {
+   "t": "Breakdown chart legend unclear",
+   "c": [
+    5
+   ],
+   "note": "down in breakdown; cosmetic"
+  },
+  {
+   "t": "Fee shown as £500 instead of £50",
+   "c": [
+    1
+   ],
+   "note": "500 in £500; wrong amount = financial"
+  },
+  {
+   "t": "Export contains 5000 rows instead of 500",
+   "c": [
+    3
+   ],
+   "note": "500 in 5000; data integrity"
+  },
+  {
+   "t": "Card payment declined incorrectly",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Duplicate transaction on retry",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Billing run double-charged customers",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Checkout fails for Visa",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Fraud rule blocks valid purchases",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Refund not issued after cancellation",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Wrong balance shown after transfer",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Money missing from wallet",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Direct debit mandate not created",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Discard changes dialog text wrong",
+   "c": [
+    5
+   ],
+   "note": "card in discard; cosmetic"
+  },
+  {
+   "t": "Scorecard colours hard to read",
+   "c": [
+    5
+   ],
+   "note": "card in scorecard; cosmetic"
+  },
+  {
+   "t": "SFTP file transfer to partner fails",
+   "c": [
+    0
+   ],
+   "note": "transfer = file transfer, not money"
+  },
+  {
+   "t": "Fundamentals tab missing from course page",
+   "c": [],
+   "note": "fund in fundamentals"
+  },
+  {
+   "t": "Cardinality warning in query planner",
+   "c": [
+    4
+   ],
+   "note": "card in cardinality"
+  },
+  {
+   "t": "Users cannot login after reset",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Password reset email not sent",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "SSO redirect loop",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Token expired errors on mobile",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "401 on valid credentials",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Locked out after three attempts",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Sign in button unresponsive",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Cannot access admin console",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Author name truncated in article list",
+   "c": [
+    5
+   ],
+   "note": "auth in author; cosmetic"
+  },
+  {
+   "t": "Lessons learned page returns 404",
+   "c": [],
+   "note": "sso in lessons"
+  },
+  {
+   "t": "Association list not sorted alphabetically",
+   "c": [],
+   "note": "sso in association"
+  },
+  {
+   "t": "Total shown as £401 instead of £410",
+   "c": [
+    1,
+    3
+   ],
+   "note": "401 in £401; wrong amount"
+  },
+  {
+   "t": "Possession field label typo on form",
+   "c": [
+    5
+   ],
+   "note": "session in possession; cosmetic"
+  },
+  {
+   "t": "Data loss when saving form",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Corruption of attachments on upload",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Records overwritten by concurrent edit",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Orders deleted after migration",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Missing record in audit export",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Wrong data shown for another customer",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Duplicate rows created on import",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Incorrect calculation of VAT on invoice",
+   "c": [
+    1,
+    3
+   ]
+  },
+  {
+   "t": "Deleted items folder label has a typo",
+   "c": [
+    5
+   ],
+   "note": "deleted in label; cosmetic"
+  },
+  {
+   "t": "Overwritten placeholder text in input looks odd",
+   "c": [
+    5
+   ],
+   "note": "overwritten; cosmetic"
+  },
+  {
+   "t": "Search page is very slow",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Timeout when loading reports",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "High latency on API calls",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Memory leak in worker process",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "CPU spikes to 100 percent",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Page load takes 12 seconds",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Response time degraded after release",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Laggy scrolling on long lists",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Slow motion animation preference ignored",
+   "c": [],
+   "note": "slow = animation setting"
+  },
+  {
+   "t": "Timeout setting label unclear in preferences",
+   "c": [
+    5
+   ],
+   "note": "timeout in label; cosmetic"
+  },
+  {
+   "t": "Typo in footer label",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Spelling mistake on pricing page",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Wrong colour on primary button",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Font too small in table",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Misaligned margin on card layout",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Icon missing in toolbar",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Padding inconsistent in modal",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Label text truncated on narrow panels",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Silicon supply feed fails to refresh",
+   "c": [
+    0
+   ],
+   "note": "icon in silicon"
+  },
+  {
+   "t": "Marginal gains report returns empty",
+   "c": [],
+   "note": "margin in marginal"
+  },
+  {
+   "t": "Typology classifier misfires on short input",
+   "c": [],
+   "note": "typo in typology"
+  },
+  {
+   "t": "Layout broken in Safari",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Android back button exits app",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Does not render on Firefox",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "iOS keyboard covers input",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Tablet layout overflows",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Not responsive below 400px",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Chrome extension blocks upload",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Edge shows blank page",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Knowledge base search returns nothing",
+   "c": [],
+   "note": "edge in knowledge"
+  },
+  {
+   "t": "Acknowledge button does nothing on click",
+   "c": [],
+   "note": "edge in acknowledge"
+  },
+  {
+   "t": "Scenarios page is empty",
+   "c": [],
+   "note": "ios in scenarios"
+  },
+  {
+   "t": "Edge case in rounding of ledger totals",
+   "c": [
+    3
+   ],
+   "note": "edge case, not Edge browser"
+  },
+  {
+   "t": "XSS vulnerability in comments",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "SQL injection in search box",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "CVE-2026-1234 in dependency",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "CSRF token missing on form",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Exposure of API key in logs",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Data breach suspected",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Exploit published for library",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Hardcoded secret in repository",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Open S3 bucket with customer files",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Dependency injection container fails to start",
+   "c": [
+    0
+   ],
+   "note": "injection = programming term"
+  },
+  {
+   "t": "SLA breach alert not firing",
+   "c": [],
+   "note": "breach of SLA is not security"
+  },
+  {
+   "t": "Camera exposure slider has no effect",
+   "c": [],
+   "note": "exposure = photography"
+  },
+  {
+   "t": "Something unrelated happens here",
+   "c": []
+  },
+  {
+   "t": "Behaviour differs from the design",
+   "c": []
+  },
+  {
+   "t": "Report shows an extra empty line",
+   "c": []
+  }
+ ]
+}

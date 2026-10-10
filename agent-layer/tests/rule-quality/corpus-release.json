@@ -1,0 +1,821 @@
+{
+ "engine": "release_hint",
+ "tool": "rm",
+ "concepts": [
+  "payment / financial system",
+  "authentication / identity",
+  "database / schema / data store",
+  "emergency / hotfix",
+  "mobile delivery",
+  "personal data / GDPR / privacy",
+  "third-party / supplier dependency",
+  "pilot / limited release",
+  "decommission / sunset"
+ ],
+ "labelling": "By intent, authored without consulting the regex results; Claude's judgement, for human review. Concept index == rule index in the tool's table.",
+ "cases": [
+  {
+   "t": "Payment gateway upgrade",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Checkout page redesign",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Billing engine migration",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Invoice generation fix",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Card transaction retry logic",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Stripe webhook listener update",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "PayPal button integration",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Open Banking connector release",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "BACS file export change",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Apple Pay support",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "SEPA direct debit mandate update",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "FX rate service v2",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Trading platform order routing",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Settlement batch job tuning",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "PCI DSS scope reduction",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Refund processing flow",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Payout schedule change for merchants",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Direct debit collection run",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Wire transfer limits update",
+   "c": [
+    0
+   ]
+  },
+  {
+   "t": "Update PFX certificate on web tier",
+   "c": [],
+   "note": "pfx contains fx"
+  },
+  {
+   "t": "Download page copy changes",
+   "c": []
+  },
+  {
+   "t": "Quarterly housekeeping",
+   "c": []
+  },
+  {
+   "t": "Static asset refresh",
+   "c": []
+  },
+  {
+   "t": "Typo fixes in footer",
+   "c": []
+  },
+  {
+   "t": "Refine search ranking",
+   "c": []
+  },
+  {
+   "t": "Finance team intranet page text update",
+   "c": [],
+   "note": "judgement: wording only, not a financial system change"
+  },
+  {
+   "t": "Trading card game promo banner",
+   "c": [],
+   "note": "trading + card, not a financial system"
+  },
+  {
+   "t": "SSO login rework",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Password reset flow change",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "OAuth2 provider switch",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "SAML federation with partner",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "MFA enrolment screen",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "2FA via authenticator app",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "LDAP directory sync fix",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Active Directory group mapping",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Okta tenant migration",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Biometric sign-in",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Single sign-on certificate renewal",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Passkey support",
+   "c": [
+    1
+   ]
+  },
+  {
+   "t": "Author bio page layout",
+   "c": [],
+   "note": "auth in author"
+  },
+  {
+   "t": "Association directory listing",
+   "c": [],
+   "note": "sso in association"
+  },
+  {
+   "t": "Lessons learned page update",
+   "c": [],
+   "note": "sso in lessons"
+  },
+  {
+   "t": "Authority matrix document refresh",
+   "c": [],
+   "note": "auth in authority"
+  },
+  {
+   "t": "Brand identity refresh on landing page",
+   "c": [],
+   "note": "identity = branding"
+  },
+  {
+   "t": "Remove old test credential from docs",
+   "c": [],
+   "note": "docs tidy; judgement"
+  },
+  {
+   "t": "Database schema migration",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Postgres 15 upgrade",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Add index to orders table",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "MySQL replication change",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Oracle to Postgres cutover",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "MongoDB cluster resize",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Elasticsearch reindex",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Data model change for customer",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "SQL Server patching",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "DB maintenance window",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Alter table orders add column",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Backfill job for legacy rows",
+   "c": [
+    2
+   ]
+  },
+  {
+   "t": "Index page copy update",
+   "c": [],
+   "note": "HTML index page"
+  },
+  {
+   "t": "Elastic scaling of web tier",
+   "c": [],
+   "note": "autoscaling, not Elasticsearch"
+  },
+  {
+   "t": "Subindex tidy in the style guide",
+   "c": [],
+   "note": "index in subindex"
+  },
+  {
+   "t": "Feedback widget colour tweak",
+   "c": []
+  },
+  {
+   "t": "Emergency fix for checkout",
+   "c": [
+    0,
+    3
+   ]
+  },
+  {
+   "t": "Urgent hotfix rollout",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "P1 incident remediation",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Critical fix for login",
+   "c": [
+    1,
+    3
+   ]
+  },
+  {
+   "t": "Sev1 patch deployment",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Severity 1 workaround release",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Hot-fix to payment queue",
+   "c": [
+    0,
+    3
+   ]
+  },
+  {
+   "t": "Major incident remediation release",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Out-of-band security patch",
+   "c": [
+    3
+   ]
+  },
+  {
+   "t": "Step1 onboarding screens",
+   "c": [],
+   "note": "p1 in step1"
+  },
+  {
+   "t": "Non-urgent tidy-up of release notes",
+   "c": [],
+   "note": "negated urgency"
+  },
+  {
+   "t": "Not an emergency: routine monthly release",
+   "c": [],
+   "note": "negated emergency"
+  },
+  {
+   "t": "Stop1 sign replacement documentation",
+   "c": [],
+   "note": "p1 in stop1"
+  },
+  {
+   "t": "iOS app update",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Android release 5.2",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "App Store submission for v3",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Google Play staged rollout",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "TestFlight build for UAT",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Mobile onboarding flow",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "iPhone widget",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Phased rollout via app stores",
+   "c": [
+    4
+   ]
+  },
+  {
+   "t": "Scenarios documentation update",
+   "c": [],
+   "note": "ios in scenarios"
+  },
+  {
+   "t": "Studios booking page",
+   "c": [],
+   "note": "ios in studios"
+  },
+  {
+   "t": "Radios catalogue update",
+   "c": [],
+   "note": "ios in radios"
+  },
+  {
+   "t": "Curiosity-driven reading list",
+   "c": [],
+   "note": "ios in curiosity"
+  },
+  {
+   "t": "GDPR consent banner update",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Personal data export",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "PII masking in logs",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Data subject access request tool",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "ICO reporting workflow",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Privacy notice rewrite",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Data protection impact assessment template",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "DPA addendum rollout",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Customer address book import",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Date-of-birth field added to profile",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Email preference centre",
+   "c": [
+    5
+   ]
+  },
+  {
+   "t": "Unicode font support",
+   "c": [],
+   "note": "ico in unicode"
+  },
+  {
+   "t": "Mexico office opening banner",
+   "c": [],
+   "note": "ico in mexico"
+  },
+  {
+   "t": "Basic table sorting",
+   "c": []
+  },
+  {
+   "t": "Update panel layout for admin screen",
+   "c": []
+  },
+  {
+   "t": "Supplier API integration",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Third-party SDK upgrade",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Vendor portal connector",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Partner API v2 adoption",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "SaaS CRM connector",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "External service endpoint swap",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Salesforce integration",
+   "c": [
+    6
+   ]
+  },
+  {
+   "t": "Non-vendor internal tooling clean-up",
+   "c": [],
+   "note": "contains vendor as negation"
+  },
+  {
+   "t": "Saaslike naming guideline for modules",
+   "c": [],
+   "note": "saas substring"
+  },
+  {
+   "t": "Canary rollout of new search",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Beta programme for new dashboard",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Pilot with 5% of users",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Feature flag for new navigation",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Dark launch of recommendations",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "A/B test of landing page",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Limited release to staff",
+   "c": [
+    7
+   ]
+  },
+  {
+   "t": "Alphabetical sorting of names",
+   "c": [],
+   "note": "beta in alphabetical"
+  },
+  {
+   "t": "Alphabet soup glossary",
+   "c": [],
+   "note": "contains alphabet, not beta"
+  },
+  {
+   "t": "Previews of attachments are slow to open",
+   "c": [],
+   "note": "preview is a feature, not a preview release"
+  },
+  {
+   "t": "Decommission legacy portal",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "Deprecate v1 API",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "Sunset old reporting tool",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "End of life for Windows 2012 hosts",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "Retire legacy portal",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "Turn off the FTP service",
+   "c": [
+    8
+   ]
+  },
+  {
+   "t": "Geolocation lookup service",
+   "c": [],
+   "note": "eol in geolocation"
+  },
+  {
+   "t": "Remove typo from footer",
+   "c": [],
+   "note": "remove = edit, not decommission"
+  },
+  {
+   "t": "Remove duplicate button",
+   "c": [],
+   "note": "remove = edit"
+  },
+  {
+   "t": "Turn off animations for reduced motion setting",
+   "c": [],
+   "note": "a setting"
+  },
+  {
+   "t": "Removal of trailing whitespace in config",
+   "c": [],
+   "note": "removal"
+  },
+  {
+   "t": "Payment login change",
+   "c": [
+    0,
+    1
+   ]
+  },
+  {
+   "t": "SSO for payment platform",
+   "c": [
+    0,
+    1
+   ]
+  },
+  {
+   "t": "Database upgrade for the mobile app backend",
+   "c": [
+    2,
+    4
+   ]
+  },
+  {
+   "t": "GDPR changes for supplier data exchange",
+   "c": [
+    5,
+    6
+   ]
+  },
+  {
+   "t": "Emergency rollback of canary feature",
+   "c": [
+    3,
+    7
+   ]
+  },
+  {
+   "t": "Retire legacy payment system",
+   "c": [
+    0,
+    8
+   ]
+  },
+  {
+   "t": "Something unrelated",
+   "c": []
+  },
+  {
+   "t": "Housekeeping",
+   "c": []
+  },
+  {
+   "t": "Rename internal wiki space",
+   "c": []
+  },
+  {
+   "t": "Update team page",
+   "c": []
+  },
+  {
+   "t": "Refresh onboarding checklist",
+   "c": []
+  }
+ ]
+}
