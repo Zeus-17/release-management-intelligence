@@ -80,6 +80,7 @@ async function drive(win, doc){
   // the Go / No-Go wizard for the first release
   try{ win.eval("_gngRid = STATE.releases[0].id; _gngStep = 0"); for(let s=0;s<5;s++){ win.eval('_gngStep = '+s); win.renderGNGStep(); await record('gng:'+s); } }catch(e){ snaps['gng']='ERR '+e.message; }
   // R-1: the defect list (status badges and detail lines) and the status screen with a history
+  try{ for(const rl of STATE.releases.slice(0,3)){ win.openWhyReadiness(rl.id); await record('whyReadiness:'+rl.id); win.closeModal('whyReadinessModal'); } }catch(e){ snaps['call:whyReadiness']='ERR '+e.message; }   // W1
   try{ win.renderDefects(); await record('call:renderDefects'); for(let i=0;i<3;i++){ win.openDefectStatus(STATE.defects[i].id); await record('statusScreen:'+i); const sel=doc.getElementById('ds-status'); if(sel){ for(const o of [...sel.options].slice(0,13)){ sel.value=o.value; win.renderDefectStatusFields(); await record('statusScreen:'+i+':'+o.value); } } win.closeModal('defectStatusModal'); } }catch(e){ snaps['call:statusScreen']='ERR '+e.message; }
   el.remove();
   return {snaps, xss: win.__xss || 0, imgs: doc.querySelectorAll('img[data-probe]').length};

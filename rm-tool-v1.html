@@ -188,6 +188,8 @@ body.light-mode .rag-r{background:#b91c1c;}
 .sev-medium  {background:#1e3a8a;}
 .sev-low     {background:#374151;color:#e5e7eb;}
 .defect-class{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:var(--mono);white-space:nowrap;color:#fff;line-height:1.4;}
+.why-table{width:100%;border-collapse:collapse;font-size:12px;}.why-table th,.why-table td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;}.why-table th{color:var(--text3);font-weight:500;font-size:11px;}
+.why-detail{font-size:11px;color:var(--text3);margin-top:2px;}.why-total td{font-weight:700;border-top:2px solid var(--border2);}.why-list{margin:4px 0 0 18px;padding:0;font-size:12px;line-height:1.7;color:var(--text2);}
 .defect-status-badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;border:1px solid var(--border2);}
 .defect-status-active{background:rgba(251,191,36,.12);color:var(--amber);border-color:rgba(251,191,36,.35);}
 .defect-status-resolved{background:rgba(52,211,153,.12);color:var(--green);border-color:rgba(52,211,153,.35);}
@@ -2204,6 +2206,18 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
   </div>
 </div>
 
+<!-- ═══════════════════ WHY THIS READINESS SCORE (W1) ═══════════════════ -->
+<div class="modal-overlay" id="whyReadinessModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <div class="modal-title">Why this readiness score</div>
+      <button class="modal-close" onclick="closeModal('whyReadinessModal')">×</button>
+    </div>
+    <div id="whyReadinessBody"></div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('whyReadinessModal')">Close</button></div>
+  </div>
+</div>
+
 <!-- ═══════════════════ DEFECT STATUS (R-1) ═══════════════════ -->
 <div class="modal-overlay" id="defectStatusModal">
   <div class="modal" style="max-width:600px;">
@@ -3783,6 +3797,7 @@ function renderDashboardTable(){
       <td><span class="gate-pill ${gateClass}" title="${gatesDone}/${gatesTotal} gates done">${gatesDone}/${gatesTotal} · ${gateName}</span></td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${(function(){ const rd = calculateReadiness(r); return renderReadinessRing(rd.score, rd.failedGates); })()}
+        <button class="btn btn-secondary btn-xs" onclick="openWhyReadiness('${r.id}')" title="Why this score, and what would change it">Why?</button>
         <button class="btn btn-primary btn-xs" onclick="openGNGWizard('${r.id}')" title="Go/No-Go Wizard">🚦</button>
         <button class="btn btn-secondary btn-xs" onclick="editReleaseRag('${r.id}')">RAG</button>
         <button class="btn btn-secondary btn-xs" onclick="setStatusAndGo('${r.id}')">Status</button>
@@ -7859,8 +7874,9 @@ window.RMTool = {
 // ═══════════════════════════════════════════════════════
 //  RELEASE READINESS SCORE
 // ═══════════════════════════════════════════════════════
-function calculateReadiness(rel){
+function calculateReadiness(rel, defectsArg){
   if(!rel) return {score:0,gates:0,defects:0,envs:0,signoffs:0};
+  const allDefects = defectsArg || STATE.defects;   // W1: "what if" callers pass a modified copy; everyone else gets the saved defects
   // Q-7 / Q-8 (2026-10-10): with no gates, or no environments, any number would be an artefact (the old code gave 50/100, or NaN). Say "not assessed" instead.
   const envsCheck = rel.envPath||['DEV','SIT','UAT','PRE-PROD','PROD'];
   if(!rel.gates.length || !envsCheck.length){
@@ -7870,7 +7886,7 @@ function calculateReadiness(rel){
   const gatesDone  = rel.gates.filter(g=>g.status==='passed'||g.status==='waived').length;
   const gatesPct   = Math.round((gatesDone/gatesTotal)*100);
 
-  const blockers    = STATE.defects.filter(d=>d.releaseId===rel.id&&isUnresolvedBlocker(d)).length;
+  const blockers    = allDefects.filter(d=>d.releaseId===rel.id&&isUnresolvedBlocker(d)).length;
   const defectScore = blockers===0?100:blockers===1?60:blockers===2?30:0;
 
   const envs    = rel.envPath||['DEV','SIT','UAT','PRE-PROD','PROD'];
@@ -7889,6 +7905,95 @@ function calculateReadiness(rel){
 
 function readinessColour(score){
   return score>=75?'#10b981':score>=50?'#f59e0b':'#ef4444';
+}
+
+// ═══════════════════════════════════════════════════════
+//  W1: WHY THIS READINESS SCORE, AND WHAT WOULD CHANGE IT  (2026-10-10)
+//  Every number comes from calculateReadiness() itself (the "what ifs" are that same function run on a modified COPY), so this can never disagree with the score
+//  and is never a new verdict. It explains arithmetic; the decision to go or not stays with a person.
+// ═══════════════════════════════════════════════════════
+function readinessBandName(score){ return score>=75?'green':score>=50?'amber':'red'; }
+function explainReadiness(rel, defectsArg){
+  const defs = defectsArg || STATE.defects;
+  const base = calculateReadiness(rel, defs);
+  if(!rel || base.notAssessed) return {notAssessed:true, reason:base.reason||'no_release'};
+  const gateName = g => (GATE_DEFS[g.id]||{}).name || g.id;
+  const envs = rel.envPath||['DEV','SIT','UAT','PRE-PROD','PROD'], envObj = rel.environments||{};
+  const gatesDone = rel.gates.filter(g=>g.status==='passed'||g.status==='waived').length;
+  const passed = rel.gates.filter(g=>g.status==='passed'), signed = passed.filter(g=>g.signedBy).length;
+  const openBlockers = defs.filter(d=>d.releaseId===rel.id&&isUnresolvedBlocker(d));
+  const healthy = envs.filter(e=>envObj[e]&&envObj[e].health==='healthy').length;
+  const comps = [
+    {key:'gates',    label:'Gates passed or waived', weight:40, value:base.gates,    detail:gatesDone+' of '+rel.gates.length+' gates passed or waived'},
+    {key:'defects',  label:'Release blockers',       weight:30, value:base.defects,  detail:openBlockers.length+' open release blocker'+(openBlockers.length===1?'':'s')+' (none = 100, one = 60, two = 30, three or more = 0)'},
+    {key:'envs',     label:'Environments healthy',   weight:20, value:base.envs,     detail:healthy+' of '+envs.length+' environments healthy'},
+    {key:'signoffs', label:'Sign-offs recorded',     weight:10, value:base.signoffs, detail:signed+' of '+passed.length+' passed gates have a recorded sign-off'}
+  ].map(c=>Object.assign(c,{points:c.value*c.weight/100, lost:(100-c.value)*c.weight/100}));
+
+  // the single changes a person could make, each described so the test can apply it independently
+  const candidates = (r, d)=>{
+    const out = [];
+    r.gates.forEach(g=>{
+      const done = g.status==='passed'||g.status==='waived';
+      if(!done) out.push({kind:'pass_gate', id:g.id, text:'Pass \u201c'+gateName(g)+'\u201d and record its sign-off'});
+      else if(g.status==='passed' && !g.signedBy) out.push({kind:'sign_gate', id:g.id, text:'Record the sign-off for \u201c'+gateName(g)+'\u201d'});
+    });
+    const blk = d.filter(x=>x.releaseId===r.id&&isUnresolvedBlocker(x));
+    if(blk.length) out.push({kind:'resolve_blocker', id:blk[0].id, text:(blk.length>1?'Resolve one open blocker: \u201c':'Resolve the open blocker: \u201c')+(blk[0].title||'untitled')+'\u201d (confirmed or decided by a named person)'});
+    (r.envPath||['DEV','SIT','UAT','PRE-PROD','PROD']).forEach(e=>{ const h = r.environments&&r.environments[e]&&r.environments[e].health; if(h!=='healthy') out.push({kind:'env_healthy', id:e, text:'Mark '+e+' healthy (now '+(h||'unknown')+')'}); });
+    return out;
+  };
+  const apply = (r, d, a)=>{
+    const r2 = JSON.parse(JSON.stringify(r)); let d2 = d;
+    if(a.kind==='pass_gate'){ const g = r2.gates.find(x=>x.id===a.id); g.status='passed'; g.signedBy='(sign-off recorded)'; }
+    else if(a.kind==='sign_gate'){ r2.gates.find(x=>x.id===a.id).signedBy='(sign-off recorded)'; }
+    else if(a.kind==='resolve_blocker'){ d2 = d.filter(x=>x.id!==a.id); }
+    else if(a.kind==='env_healthy'){ r2.environments = r2.environments||{}; r2.environments[a.id] = Object.assign({}, r2.environments[a.id], {health:'healthy'}); }
+    return {rel:r2, defs:d2};
+  };
+  const evaluate = (r, d)=> candidates(r, d).map(a=>{ const st = apply(r, d, a), sc = calculateReadiness(st.rel, st.defs).score; return {kind:a.kind, id:a.id, text:a.text, newScore:sc, newBand:readinessBandName(sc), st}; });
+
+  const first = evaluate(rel, defs);
+  const helpful = first.filter(a=>a.newScore>base.score).sort((a,b)=>(b.newScore-a.newScore)).slice(0,6).map(a=>({kind:a.kind,id:a.id,text:a.text,newScore:a.newScore,delta:a.newScore-base.score,newBand:a.newBand,crossesBand:a.newBand!==readinessBandName(base.score)}));
+
+  // one illustrative route to the next colour band: always take the single change that adds the most, until the band changes (never more than 8 steps)
+  const band = readinessBandName(base.score), target = base.score>=75 ? null : (base.score>=50 ? 75 : 50);
+  let path = null;
+  if(target!==null){
+    path = {target, targetBand:readinessBandName(target), steps:[], reached:false};
+    let st = {rel, defs}, sc = base.score;
+    for(let i=0;i<8 && sc<target;i++){
+      const best = evaluate(st.rel, st.defs).filter(a=>a.newScore>sc).sort((a,b)=>b.newScore-a.newScore)[0];
+      if(!best) break;
+      path.steps.push({kind:best.kind,id:best.id,text:best.text,scoreAfter:best.newScore}); st = best.st; sc = best.newScore;
+    }
+    path.reached = sc>=target;
+  }
+  const notes = [];
+  if(base.failedGates>0) notes.push(base.failedGates+' failed gate'+(base.failedGates>1?'s':'')+': a failed gate scores like a pending one, so it does not change the number - it is flagged here instead.');
+  const unsigned = passed.filter(g=>!g.signedBy);
+  if(unsigned.length) notes.push(unsigned.length+' passed gate'+(unsigned.length>1?'s have':' has')+' no recorded sign-off, which lowers the sign-off share.');
+  return {notAssessed:false, score:base.score, band, components:comps, actions:helpful, path, notes, failedGates:base.failedGates};
+}
+
+function openWhyReadiness(rid){
+  const rel = STATE.releases.find(r=>r.id===rid); if(!rel) return;
+  const ex = explainReadiness(rel);
+  const el = document.getElementById('whyReadinessBody');
+  const bandWord = {green:'green (75 or more)', amber:'amber (50 to 74)', red:'red (below 50)'};
+  if(ex.notAssessed){
+    el.innerHTML = '<p style="font-size:13px;">This release has no score yet: '+(ex.reason==='no_gates'?'it has no quality gates':'it has no environments in its path')+'. Add them and the score will appear.</p>';
+  } else {
+    el.innerHTML = '<div style="font-size:13px;margin-bottom:10px;"><strong>'+escHtml(rel.name)+'</strong> scores <strong>'+ex.score+' / 100</strong>, shown '+bandWord[ex.band]+'.</div>'+
+      '<table class="why-table"><tr><th>What is counted</th><th>Result</th><th>Weight</th><th>Adds</th><th>Left out</th></tr>'+
+      ex.components.map(c=>'<tr><td>'+escHtml(c.label)+'<div class="why-detail">'+escHtml(c.detail)+'</div></td><td>'+c.value+'%</td><td>'+c.weight+'%</td><td>'+c.points.toFixed(1)+'</td><td>'+c.lost.toFixed(1)+'</td></tr>').join('')+
+      '<tr class="why-total"><td>Total (rounded)</td><td></td><td>100%</td><td>'+ex.score+'</td><td></td></tr></table>'+
+      (ex.notes.length?'<div class="hint-banner hint-warn" style="margin:10px 0;font-size:12px;">'+ex.notes.map(escHtml).join('<br>')+'</div>':'')+
+      (ex.actions.length?'<div style="font-size:13px;font-weight:600;margin:12px 0 4px;">What would raise it (one change at a time)</div><ul class="why-list">'+ex.actions.map(a=>'<li>'+escHtml(a.text)+' &rarr; <strong>'+a.newScore+'</strong> (+'+a.delta+')'+(a.crossesBand?' &middot; would show <strong>'+a.newBand+'</strong>':'')+'</li>').join('')+'</ul>':'<div style="font-size:12px;color:var(--text3);margin-top:10px;">Nothing on this list would raise the score further.</div>')+
+      (ex.path?'<div style="font-size:13px;font-weight:600;margin:12px 0 4px;">One way to reach '+ex.path.targetBand+' ('+ex.path.target+' or more)</div>'+(ex.path.steps.length?'<ol class="why-list">'+ex.path.steps.map(s=>'<li>'+escHtml(s.text)+' &rarr; '+s.scoreAfter+'</li>').join('')+'</ol>'+(ex.path.reached?'':'<div style="font-size:12px;color:var(--text3);">Even with these, the score stays below '+ex.path.target+'.</div>'):'<div style="font-size:12px;color:var(--text3);">No single change on its own raises the score.</div>'):'')+
+      '<div style="font-size:11px;color:var(--text3);margin-top:14px;line-height:1.6;">This explains the arithmetic of the score. It is not a Go / No-Go: the score does not see risks, scope, approvals or anything outside these four checks, and the colours are for display only. The deciding is yours.</div>';
+  }
+  openModal('whyReadinessModal');
 }
 
 function renderReadinessRing(score, failedGates){
