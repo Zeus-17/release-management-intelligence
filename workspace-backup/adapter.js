@@ -54,6 +54,26 @@ var WB_ADAPTER = (function () {
       return '';
     },
 
+    /** A readable Markdown summary of the data (for pasting into a wiki page). Not a backup. */
+    readable: function (entries) {
+      var st = entries[STATE_KEY] !== undefined ? parseJson(entries[STATE_KEY]) : undefined;
+      if (!isObj(st)) return '_No release or defect data is saved in this browser._';
+      function cell(v) { return String(v == null ? '' : v).split('|').join(String.fromCharCode(166)).split(String.fromCharCode(13)).join(' ').split(String.fromCharCode(10)).join(' ').trim(); }
+      var rel = Array.isArray(st.releases) ? st.releases : [], def = Array.isArray(st.defects) ? st.defects : [];
+      var open = typeof isUnresolvedBlocker === 'function' ? def.filter(function (d) { return isUnresolvedBlocker(d); }).length : def.filter(function (d) { return d && d.classification === 'blocker'; }).length;
+      var out = ['**Releases:** ' + rel.length + '  |  **Defects:** ' + def.length + '  |  **Open release blockers:** ' + open, '', '## Releases', '', '| Release | Type | Target date | Status | RAG | Gates passed or waived |', '|---|---|---|---|---|---|'];
+      rel.forEach(function (r) { var g = Array.isArray(r.gates) ? r.gates : []; out.push('| ' + [cell(r.name), cell(r.type), cell(r.targetDate), cell(r.status), cell(r.rag), g.filter(function (x) { return x && (x.status === 'passed' || x.status === 'waived'); }).length + ' / ' + g.length].join(' | ') + ' |'); });
+      if (!rel.length) out.push('| _none_ | | | | | |');
+      out.push('', '## Defects', '', '| Defect | Severity | Classification | Status | Ticket |', '|---|---|---|---|---|');
+      def.forEach(function (d) {
+        var key = typeof defectStatusKey === 'function' ? defectStatusKey(d) : d.status;
+        var label = typeof DEFECT_STATUS_DEFS !== 'undefined' && DEFECT_STATUS_DEFS[key] ? DEFECT_STATUS_DEFS[key].label : key;
+        out.push('| ' + [cell(d.title), cell(d.severity), cell(d.classification), cell(label), cell(d.ticket)].join(' | ') + ' |');
+      });
+      if (!def.length) out.push('| _none_ | | | | |');
+      return out.join(String.fromCharCode(10));
+    },
+
     /** Files made by the old "Export JSON" button: {releases, defects, dora, settings}. Loaded as data only (other saved items are left alone). */
     legacy: function (o) {
       if (!isObj(o) || (!Array.isArray(o.releases) && !Array.isArray(o.defects))) return null;
