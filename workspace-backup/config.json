@@ -1,0 +1,5 @@
+{
+ "tool": "rm",
+ "html": "../rm-tool-v1.html",
+ "anchorRegex": "^<script>\\n// ═+\\n//  STATE\\n"
+}
