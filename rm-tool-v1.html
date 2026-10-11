@@ -2206,6 +2206,23 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
   </div>
 </div>
 
+<!-- ═══════════════════ DECISION RECORD (N1) ═══════════════════ -->
+<div class="modal-overlay" id="decisionRecordModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <div class="modal-title">Decision record</div>
+      <button class="modal-close" onclick="closeModal('decisionRecordModal')">×</button>
+    </div>
+    <input type="hidden" id="dr-rid">
+    <div id="decisionRecordBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('decisionRecordModal')">Close</button>
+      <button class="btn btn-secondary" onclick="reRecordDecision()">Re-record the decision…</button>
+      <button class="btn btn-primary" onclick="reconfirmDecision()">It still stands</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ WHY THIS READINESS SCORE (W1) ═══════════════════ -->
 <div class="modal-overlay" id="whyReadinessModal">
   <div class="modal" style="max-width:640px;">
@@ -2297,6 +2314,7 @@ const ready = window.RMTool.isGoReady(); // true/false</div>
       <div class="changelog-section-title">Accuracy &amp; safety update (October 2026)</div>
       <div class="changelog-item">Keyword hints now match whole words and ignore negated phrases (“non-urgent”, “not an emergency”), so “download” no longer looks like “down” and “PFX certificate” no longer looks like “fx”; more terms are recognised (e.g. Stripe, BACS, Okta, iPhone)</div>
       <div class="changelog-item">Every hint now shows the words it matched, and is labelled as a keyword match to check, not an assessment</div>
+      <div class="changelog-item">Go / No-Go decision record — valid-until date and rollback path on the decision, a snapshot of what the readiness checks looked at, and a calm “may be out of date — see what changed” prompt on the release if a blocker appears, readiness falls, a gate goes backwards or the decision expires (for a NO-GO, if things improve). “It still stands” records who looked and starts the comparison afresh. Earlier decisions are kept in a history; the tool never changes a decision for you</div>
       <div class="changelog-item">“Why?” beside each release’s readiness score — shows what is counted, each part’s weight and result, which single changes would raise the score, and one way to reach the next colour band. Everything comes from the same calculation as the score itself; it explains the arithmetic and is not a Go / No-Go</div>
       <div class="changelog-item">Backup and restore points — export everything you have saved as one file, import it back after a preview, and keep restore points in this browser; one is saved automatically before an import, a restore or a clear, so those can be undone. A calm reminder appears when there is work in the browser and no recent backup</div>
       <div class="changelog-item">Defect status lifecycle — fix identified, fix in progress, blocked, fixed (awaiting verification), reopened, resolved &amp; confirmed, and closed-by-decision (deferred, accepted, won't fix, duplicate, cannot reproduce, not a defect). A release blocker stays counted as open until a named person confirms the fix or records the decision; decisions are always listed in the Go/No-Go wizard and reports, and every change is kept in a history</div>
@@ -3793,7 +3811,7 @@ function renderDashboardTable(){
       <td><div class="release-name">${escHtml(r.name)}<small>${escHtml(r.rm||'')}</small></div></td>
       <td><span class="badge badge-${r.type}">${r.type.toUpperCase()}</span></td>
       <td>${dms}</td>
-      <td>${ragBadge(r.rag)}</td>
+      <td>${ragBadge(r.rag)}${decisionBadgeHtml(r)}</td>
       <td style="font-size:12px;font-family:var(--mono);">${r.targetDate?fmtDate(r.targetDate):'—'}</td>
       <td><span class="gate-pill ${gateClass}" title="${gatesDone}/${gatesTotal} gates done">${gatesDone}/${gatesTotal} · ${gateName}</span></td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -7983,7 +8001,8 @@ function openWhyReadiness(rid){
   const el = document.getElementById('whyReadinessBody');
   const bandWord = {green:'green (75 or more)', amber:'amber (50 to 74)', red:'red (below 50)'};
   if(ex.notAssessed){
-    el.innerHTML = '<p style="font-size:13px;">This release has no score yet: '+(ex.reason==='no_gates'?'it has no quality gates':'it has no environments in its path')+'. Add them and the score will appear.</p>';
+    const missingPart = ex.reason==='no_gates' ? 'it has no quality gates' : 'it has no environments in its path';   // fixed wording, not user text
+    el.innerHTML = '<p style="font-size:13px;">This release has no score yet: '+missingPart+'. Add them and the score will appear.</p>';
   } else {
     el.innerHTML = '<div style="font-size:13px;margin-bottom:10px;"><strong>'+escHtml(rel.name)+'</strong> scores <strong>'+ex.score+' / 100</strong>, shown '+bandWord[ex.band]+'.</div>'+
       '<table class="why-table"><tr><th>What is counted</th><th>Result</th><th>Weight</th><th>Adds</th><th>Left out</th></tr>'+
@@ -8082,7 +8101,12 @@ function renderGNGStep(){
         <div class="form-group"><label>Decision Made By</label><input type="text" id="gng-decided-by" placeholder="Name / role"></div>
         <div class="form-group"><label>Decision Date/Time</label><input type="datetime-local" id="gng-decided-at" value="${new Date().toISOString().slice(0,16)}"></div>
       </div>
-      <div class="form-group"><label>Rationale / Notes</label><textarea id="gng-rationale" rows="3" placeholder="Decision rationale, conditions, next steps…"></textarea></div>`
+      <div class="form-group"><label>Rationale / Notes</label><textarea id="gng-rationale" rows="3" placeholder="Decision rationale, conditions, next steps…"></textarea></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Valid until <span style="font-size:10px;color:var(--text3);">(optional — leave blank if it holds until the release is done)</span></label><input type="datetime-local" id="gng-expires"></div>
+        <div class="form-group"><label>Rollback path <span style="font-size:10px;color:var(--text3);">(where it is, who triggers it)</span></label><textarea id="gng-rollback" rows="2" placeholder="e.g. Redeploy previous image; DevOps on-call triggers">${escHtml((rel.runbook||[]).filter(s=>s.type==='rollback').map(s=>s.description).filter(Boolean).slice(0,3).join('; '))}</textarea></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6;">What the readiness checks look at is saved with this decision. If it changes later, the release will say "may be out of date" and show what changed. The decision itself is never changed for you.</div>`
     }
   ];
 
@@ -8106,12 +8130,17 @@ function recordGNGDecision(){
   const by = document.getElementById('gng-decided-by')?.value.trim();
   const at = document.getElementById('gng-decided-at')?.value;
   if(!by){ showToast('Please enter who made the decision.','warn',2500); return; }
+  // N1: an earlier decision is kept in a history, never overwritten silently
+  if(rel.gngDecision){ rel.gngHistory = rel.gngHistory||[]; rel.gngHistory.push(Object.assign({}, rel.gngDecision, {supersededAt:new Date().toISOString()})); }
   rel.gngDecision = {
     decision: _gngDecision,
     decidedBy: by,
     decidedAt: at || new Date().toISOString(),
     rationale: document.getElementById('gng-rationale')?.value||'',
     riskNotes: document.getElementById('gng-risk-notes')?.value||'',
+    expiresAt: document.getElementById('gng-expires')?.value||'',
+    rollback: (document.getElementById('gng-rollback')?.value||'').trim(),
+    snapshot: buildDecisionSnapshot(rel),
     recorded: new Date().toISOString()
   };
   rel.status = _gngDecision==='go'?'go':'no-go';
@@ -8123,6 +8152,104 @@ function recordGNGDecision(){
   showToast(`${_gngDecision.toUpperCase()} decision recorded for "${rel.name}" by ${by}.`, _gngDecision==='go'?'success':'warn', 5000);
   if(_gngDecision==='go') setTimeout(()=>confirmStartHypercare(rel.id), 1500);
 }
+
+// ═══════════════════════════════════════════════════════
+//  N1: DECISION RECORD - OWNER, EXPIRY, ROLLBACK PATH, AND A "MAY BE OUT OF DATE" PROMPT  (2026-10-10)
+//  A recorded GO / NO-GO keeps a snapshot of what the readiness checks looked at when it was made. Later, the tool compares that snapshot with today's data and
+//  says what changed. It is a prompt to look again: it NEVER changes the recorded decision, the release status or any score. Nothing here uses AI.
+// ═══════════════════════════════════════════════════════
+const DECISION_SCORE_STEP = 10;   // a readiness change of this many points (or a colour-band change) is worth mentioning; placeholder, shown in the wording
+function buildDecisionSnapshot(rel, defects){
+  const defs = defects || STATE.defects, rd = calculateReadiness(rel, defs);
+  const blockers = defs.filter(d=>d.releaseId===rel.id && isUnresolvedBlocker(d)).map(d=>({id:d.id,title:d.title||''}));
+  const closed = defs.filter(d=>d.releaseId===rel.id && isBlockerClosedByDecision(d)).map(d=>({id:d.id,title:d.title||''}));
+  const envs = {}; (rel.envPath||['DEV','SIT','UAT','PRE-PROD','PROD']).forEach(e=>{ envs[e] = ((rel.environments||{})[e]||{}).health||'unknown'; });
+  return { version:1, takenAt:new Date().toISOString(), toolVersion:TOOL_VERSION,
+    readiness: rd.notAssessed ? null : { score:rd.score, gates:rd.gates, defects:rd.defects, envs:rd.envs, signoffs:rd.signoffs, band:readinessBandName(rd.score) },
+    gates: (rel.gates||[]).map(g=>({id:g.id, status:g.status, signed:!!g.signedBy})), blockers, closedBlockers:closed, envs, targetDate:rel.targetDate||'' };
+}
+/** What differs between the snapshot taken when the decision was recorded and the data now. Pure: reads its inputs, changes nothing. */
+function decisionDrift(rel, defects, nowMs){
+  const dec = rel && rel.gngDecision;
+  if(!dec) return {recorded:false};
+  const now = nowMs===undefined ? Date.now() : nowMs, defs = defects || STATE.defects, snap = dec.snapshot;
+  const out = {recorded:true, decision:dec.decision, expired:false, expiresAt:dec.expiresAt||'', noSnapshot:!snap, changes:[], adverse:0, improved:0, outOfDate:false};
+  if(dec.expiresAt){ const t = Date.parse(dec.expiresAt); if(!isNaN(t) && now>t) out.expired = true; }
+  if(snap){
+    const add = (kind, text, effect)=>{ out.changes.push({kind,text,effect}); if(effect==='adverse') out.adverse++; else if(effect==='improved') out.improved++; };
+    const gateName = id => (GATE_DEFS[id]||{}).name || id;
+    const nowBlk = defs.filter(d=>d.releaseId===rel.id && isUnresolvedBlocker(d)), was = snap.blockers||[];
+    nowBlk.filter(d=>!was.some(b=>b.id===d.id)).forEach(d=>add('blocker_added','New release blocker: “'+(d.title||'untitled')+'”','adverse'));
+    was.filter(b=>!nowBlk.some(d=>d.id===b.id)).forEach(b=>{ const d = defs.find(x=>x.id===b.id); add('blocker_cleared', d ? 'Blocker no longer counted as open: “'+(b.title||'untitled')+'”' : 'Blocker removed: “'+(b.title||'untitled')+'”', 'improved'); });
+    const rd = calculateReadiness(rel, defs);
+    if(snap.readiness && !rd.notAssessed){
+      const nb = readinessBandName(rd.score), d = rd.score - snap.readiness.score;
+      if(nb!==snap.readiness.band) add('band', 'Readiness colour changed from '+snap.readiness.band+' to '+nb+' ('+snap.readiness.score+' → '+rd.score+')', d<0?'adverse':'improved');
+      else if(Math.abs(d)>=DECISION_SCORE_STEP) add('score', 'Readiness moved from '+snap.readiness.score+' to '+rd.score+' ('+(d>0?'+':'')+d+')', d<0?'adverse':'improved');
+    }
+    (snap.gates||[]).forEach(sg=>{
+      const g = (rel.gates||[]).find(x=>x.id===sg.id), done = s => s==='passed'||s==='waived';
+      if(!g){ add('gate_removed', 'Gate no longer present: '+gateName(sg.id), 'adverse'); return; }
+      if(done(sg.status) && !done(g.status)) add('gate_regressed', gateName(sg.id)+' was '+sg.status+' and is now '+g.status, 'adverse');
+      else if(!done(sg.status) && done(g.status)) add('gate_advanced', gateName(sg.id)+' is now '+g.status+' (was '+sg.status+')', 'improved');
+      else if(sg.signed && !g.signedBy) add('signoff_removed', 'The sign-off on '+gateName(sg.id)+' has been removed', 'adverse');
+    });
+    const rank = h => h==='healthy'?2:(h==='warning'?1:0);
+    Object.keys(snap.envs||{}).forEach(e=>{
+      const h = ((rel.environments||{})[e]||{}).health||'unknown', sh = snap.envs[e];
+      if(rank(h)<rank(sh)) add('env_worse', e+' was '+sh+' and is now '+h, 'adverse');
+      else if(rank(h)>rank(sh)) add('env_better', e+' was '+sh+' and is now '+h, 'improved');
+    });
+    if((snap.targetDate||'')!==(rel.targetDate||'')) add('target_moved', 'Target date changed from '+(snap.targetDate||'not set')+' to '+(rel.targetDate||'not set'), 'neutral');
+  }
+  // a GO is worried by things getting worse; a NO-GO is worth a second look when things get better; either one is worth a look when it has expired
+  out.outOfDate = out.expired || (dec.decision==='go' ? out.adverse>0 : out.improved>0);
+  return out;
+}
+function decisionBadgeHtml(rel){
+  const dr = decisionDrift(rel); if(!dr.recorded) return '';
+  const d = rel.gngDecision, word = d.decision==='go'?'GO':'NO-GO', when = d.decidedAt?String(d.decidedAt).slice(0,10):'';
+  let cls = 'color:var(--text3);', txt = word+' recorded'+(d.decidedBy?' by '+escHtml(d.decidedBy):'')+(when?' · '+escHtml(when):'');
+  if(dr.expired){ cls = 'color:var(--red);font-weight:600;'; txt = '⏰ '+word+' decision expired '+escHtml(String(dr.expiresAt).slice(0,10)); }
+  else if(dr.outOfDate){ cls = 'color:var(--amber);font-weight:600;'; txt = '⚠ '+word+' may be out of date — see what changed'; }
+  return '<div style="margin-top:4px;"><a href="#" onclick="openDecisionRecord(\''+rel.id+'\');return false;" style="font-size:11px;text-decoration:none;'+cls+'" title="Open the decision record">'+txt+'</a></div>';
+}
+function openDecisionRecord(rid){
+  const rel = STATE.releases.find(r=>r.id===rid); if(!rel || !rel.gngDecision) return;
+  const d = rel.gngDecision, dr = decisionDrift(rel), word = d.decision==='go'?'GO':'NO-GO';
+  const row = (k,v)=>'<tr><td style="color:var(--text3);padding:3px 10px 3px 0;white-space:nowrap;vertical-align:top;">'+k+'</td><td style="padding:3px 0;">'+(v?escHtml(v):'<span style="color:var(--text3);">not recorded</span>')+'</td></tr>';
+  let h = '<div style="font-size:13px;margin-bottom:10px;"><strong>'+escHtml(rel.name)+'</strong>: <strong>'+word+'</strong> recorded by '+escHtml(d.decidedBy||'unknown')+'.</div>'+
+    '<table style="font-size:12px;border-collapse:collapse;">'+row('When',d.decidedAt?String(d.decidedAt).replace('T',' ').slice(0,16):'')+row('Rationale',d.rationale)+row('Risk notes',d.riskNotes)+row('Valid until',d.expiresAt?String(d.expiresAt).replace('T',' ').slice(0,16):'')+row('Rollback path',d.rollback)+'</table>';
+  if(dr.noSnapshot) h += '<div class="hint-banner hint-info" style="margin:10px 0;font-size:12px;">This decision was recorded before changes were tracked, so there is nothing to compare it with. Re-record it, or confirm it still stands, to start tracking.</div>';
+  else if(!dr.changes.length) h += '<div class="hint-banner hint-info" style="margin:10px 0;font-size:12px;">Nothing the readiness checks look at has changed since this was recorded.</div>';
+  else h += '<div style="font-size:13px;font-weight:600;margin:12px 0 4px;">Since this decision was recorded</div><ul class="why-list">'+dr.changes.map(c=>'<li>'+escHtml(c.text)+(c.effect==='adverse'?' <span style="color:var(--amber);">(worse)</span>':c.effect==='improved'?' <span style="color:var(--green);">(better)</span>':'')+'</li>').join('')+'</ul>';
+  if(dr.expired) h += '<div class="hint-banner hint-warn" style="margin:10px 0;font-size:12px;">This decision was only valid until '+escHtml(String(dr.expiresAt).replace('T',' ').slice(0,16))+'.</div>';
+  const recs = d.reconfirmations||[];
+  if(recs.length) h += '<div style="font-size:12px;margin-top:10px;color:var(--text2);">Confirmed as still standing: '+recs.map(r=>escHtml(r.by)+' ('+escHtml(String(r.at).slice(0,10))+(r.note?': '+escHtml(r.note):'')+')').join('; ')+'</div>';
+  const hist = rel.gngHistory||[];
+  if(hist.length) h += '<div style="font-size:12px;margin-top:10px;color:var(--text2);">Earlier decisions: '+hist.map(x=>(x.decision==='go'?'GO':'NO-GO')+' by '+escHtml(x.decidedBy||'unknown')+' ('+escHtml(String(x.decidedAt||'').slice(0,10))+')').join('; ')+'</div>';
+  h += '<div style="font-size:11px;color:var(--text3);margin:12px 0 4px;line-height:1.6;">This is a prompt to look again, not a change: nothing here alters the recorded decision, the release status or any score. Changes are listed only for what the readiness checks look at (blockers, readiness, gates, sign-offs, environments, target date).</div>'+
+    '<div class="form-grid" style="margin-top:10px;"><div class="form-group"><label>Confirm it still stands: your name</label><input type="text" id="dr-by" placeholder="Name / role"></div>'+
+    '<div class="form-group"><label>New valid-until (optional)</label><input type="datetime-local" id="dr-exp"></div></div>'+
+    '<div class="form-group"><label>Note (what you checked)</label><input type="text" id="dr-note" placeholder="e.g. new blocker reviewed with the product owner"></div>';
+  document.getElementById('decisionRecordBody').innerHTML = h;
+  document.getElementById('dr-rid').value = rid;
+  openModal('decisionRecordModal');
+}
+function reconfirmDecision(){
+  const rid = document.getElementById('dr-rid').value, rel = STATE.releases.find(r=>r.id===rid); if(!rel||!rel.gngDecision) return;
+  const by = document.getElementById('dr-by').value.trim();
+  if(!by){ showToast('Please enter your name to confirm the decision still stands.','warn',3000); return; }
+  const d = rel.gngDecision, dr = decisionDrift(rel);
+  d.reconfirmations = d.reconfirmations||[];
+  d.reconfirmations.push({by, at:new Date().toISOString(), note:document.getElementById('dr-note').value.trim(), changesSeen:dr.changes.map(c=>c.text)});
+  const exp = document.getElementById('dr-exp').value; if(exp) d.expiresAt = exp;
+  d.snapshot = buildDecisionSnapshot(rel);   // the comparison now starts from today's data; the earlier snapshot stays in the confirmation record via changesSeen
+  rel.updated = new Date().toISOString();
+  persistState(); closeModal('decisionRecordModal'); refreshDashboard();
+  showToast('Recorded: '+by+' confirmed the decision still stands.','success',3500);
+}
+function reRecordDecision(){ const rid = document.getElementById('dr-rid').value; closeModal('decisionRecordModal'); openGNGWizard(rid); }
 
 // ═══════════════════════════════════════════════════════
 //  RELEASE TEMPLATES

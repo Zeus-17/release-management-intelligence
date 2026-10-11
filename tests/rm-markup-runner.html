@@ -22,7 +22,7 @@
 <iframe id="tool"></iframe>
 <script>
 const P = '<img src=x data-probe=1 onerror="window.__xss=(window.__xss||0)+1">';
-const TEXTKEYS = new Set(['name','rm','teams','stakeholders','constraints','notes','signedBy','outcome','version','promotedBy','title','team','description','owner','mitigation','refId','completedBy','role','raisedBy','summary','customerImpact','techDebt','component','ticket','waiver','org','prefix','label','text','author','reason','message','detail','comment','value','improvements','by','ref','note','env','target','workaround','evidence']);
+const TEXTKEYS = new Set(['name','rm','teams','stakeholders','constraints','notes','signedBy','outcome','version','promotedBy','title','team','description','owner','mitigation','refId','completedBy','role','raisedBy','summary','customerImpact','techDebt','component','ticket','waiver','org','prefix','label','text','author','reason','message','detail','comment','value','improvements','by','ref','note','env','target','workaround','evidence','decidedBy','rationale','riskNotes','rollback']);
 // enumerations the tool itself controls (delivery-model keys, environment names) are not free text; they are excluded from the probe (documented residual: JS built from keys/ids inside inline handlers)
 const ENUM_ARRAYS = new Set(['deliveryModels','envPath']);
 const TABS = ['dashboard','planner','gates','defects','environments','reports','reference','integration','retrospective','scope-review','calendar','pir'];
@@ -53,6 +53,8 @@ async function drive(win, doc){
     decision: i===0 ? {by:'A Person', role:'Role', reason:'why', target:'R2', reviewBy:'2026-12-01', workaround:'w', at:'2026-10-02T09:00:00.000Z'} : null,
     confirmation: i===1 ? {by:'A Person', role:'Role', env:'UAT', evidence:'ev', at:'2026-10-02T09:00:00.000Z'} : null,
     resolver: i===2 ? {by:'A Person', role:'Role', ref:'PR-1', at:'2026-10-02T09:00:00.000Z'} : null}));
+  // N1: recorded decisions with every free-text field, one with an expiry in the past, one with a history and a confirmation
+  rels.slice(0,2).forEach((r,i)=>{ r.gngDecision = {decision:i?'nogo':'go', decidedBy:'A Person', decidedAt:'2026-10-02T09:00', rationale:'because', riskNotes:'notes', expiresAt:i?'':'2026-10-03T09:00', rollback:'redeploy', snapshot:win.buildDecisionSnapshot(r), reconfirmations:[{by:'B Person', at:'2026-10-05T09:00:00.000Z', note:'checked', changesSeen:['x']}]}; r.gngHistory=[{decision:'go', decidedBy:'C Person', decidedAt:'2026-09-01T09:00', supersededAt:'2026-10-02T09:00:00.000Z'}]; });
   if(MODE === 'probe'){
     // diagnostics: remember WHERE in the tool each unescaped probe was written into the page
     const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'innerHTML');
@@ -79,6 +81,7 @@ async function drive(win, doc){
   for(const [fn,args] of calls){ try{ if(typeof win[fn]==='function') win[fn](...args); }catch(e){ snaps['call:'+fn]='ERR '+e.message; continue; } await record('call:'+fn); }
   // the Go / No-Go wizard for the first release
   try{ win.eval("_gngRid = STATE.releases[0].id; _gngStep = 0"); for(let s=0;s<5;s++){ win.eval('_gngStep = '+s); win.renderGNGStep(); await record('gng:'+s); } }catch(e){ snaps['gng']='ERR '+e.message; }
+  try{ win.refreshDashboard(); await record('call:refreshDashboard'); for(const rl of STATE.releases.slice(0,2)){ win.openDecisionRecord(rl.id); await record('decisionRecord:'+rl.id); win.closeModal('decisionRecordModal'); } }catch(e){ snaps['call:decisionRecord']='ERR '+e.message; }   // N1
   // R-1: the defect list (status badges and detail lines) and the status screen with a history
   try{ for(const rl of STATE.releases.slice(0,3)){ win.openWhyReadiness(rl.id); await record('whyReadiness:'+rl.id); win.closeModal('whyReadinessModal'); } }catch(e){ snaps['call:whyReadiness']='ERR '+e.message; }   // W1
   try{ win.renderDefects(); await record('call:renderDefects'); for(let i=0;i<3;i++){ win.openDefectStatus(STATE.defects[i].id); await record('statusScreen:'+i); const sel=doc.getElementById('ds-status'); if(sel){ for(const o of [...sel.options].slice(0,13)){ sel.value=o.value; win.renderDefectStatusFields(); await record('statusScreen:'+i+':'+o.value); } } win.closeModal('defectStatusModal'); } }catch(e){ snaps['call:statusScreen']='ERR '+e.message; }
