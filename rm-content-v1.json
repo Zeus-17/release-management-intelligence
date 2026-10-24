@@ -13,7 +13,7 @@
     {
       "id": "dora_eu_jan2025",
       "type": "warn",
-      "title": "EU DORA in force from January 2025",
+      "title": "EU DORA applies from 17 January 2025",
       "text": "ICT change management obligations under DORA Article 9(4)(e) apply to in-scope EU financial entities: all changes to ICT systems must be recorded, tested, assessed, approved, implemented and verified in a controlled manner, and the change management process must be approved by appropriate lines of management. Verify your firm's obligations with your compliance team.",
       "applies_to": [
         "all"
@@ -107,7 +107,7 @@
   "framework_updates": [
     {
       "framework": "EU DORA",
-      "update": "Regulation (EU) 2022/2554 in force from 17 January 2025. Article 9(4)(e) change management obligations apply to all in-scope financial entities: changes to ICT systems must be recorded, tested, assessed, approved, implemented and verified in a controlled manner.",
+      "update": "Regulation (EU) 2022/2554 applies from 17 January 2025. Article 9(4)(e) change management obligations apply to all in-scope financial entities: changes to ICT systems must be recorded, tested, assessed, approved, implemented and verified in a controlled manner.",
       "url": "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
       "validated": "2026-05-29"
     },
